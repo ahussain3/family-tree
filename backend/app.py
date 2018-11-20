@@ -7,5 +7,5 @@ graph = Graph("bolt://localhost:7687", auth=('neo4j', 'banana01'))
 
 @app.route('/')
 def root():
-    graph.
-    return 'This is my server'
+    result = graph.nodes.match("Person", name="Zahid Hussain")
+    return str(result.first())
