@@ -1,5 +1,6 @@
 import graphene as gql
 import gql_types
+import database
 
 def resolver_for(cls, name):
     def inner(f):
@@ -7,6 +8,10 @@ def resolver_for(cls, name):
         setattr(cls, f"resolve_{name}", f)
         return f
     return inner
+
+def neo_to_gql(cls, object):
+    fields = {field: object.get(field) for field in cls._meta.fields.keys()}
+    return cls(**fields)
 
 # Object Types
 class Person(gql.ObjectType):
@@ -32,6 +37,7 @@ class Marriage(gql.ObjectType):
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
     person = gql.Field(Person, name=gql.String())
+    search_persons = gql.Field(gql.List(Person), name=gql.String())
 
 # Resolvers
 @resolver_for(Query, "person")
@@ -41,6 +47,10 @@ def query_person(self, info, *, name):
         gender=gql_types.GenderType.MALE
     )
 
+@resolver_for(Query, "search_persons")
+def query_search_persons(self, info, *, name):
+    persons = database.search_persons(name)
+    return [neo_to_gql(Person, person) for person in persons]
 
 schema = gql.Schema(query=Query)
 
