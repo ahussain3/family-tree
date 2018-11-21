@@ -17,11 +17,13 @@ def mutator_for(cls):
 
 def neo_to_gql(cls, object):
     fields = {field: object.get(field) for field in cls._meta.fields.keys()}
+    fields['id'] = object.get('opaque_id')
     return cls(**fields)
 
 # Object Types
 class Person(gql.ObjectType):
     """A person in the family tree"""
+    id = gql.ID(required=True)
     name = gql.String(required=True)
     gender = gql_types.GenderType()
     photo_url = gql.String()
@@ -34,8 +36,9 @@ class Person(gql.ObjectType):
 
 class Marriage(gql.ObjectType):
     """A marriage between two people"""
-    man = gql.Field(Person)
-    woman = gql.Field(Person)
+    id = gql.ID(required=True)
+    # man = gql.Field(Person)
+    # woman = gql.Field(Person)
     start_year = gql.Int()
     end_year = gql.Int()
     # children = gql.List(Person)
@@ -53,6 +56,18 @@ class AddPerson(gql.Mutation):
     def mutate(self, info, **user_args):
         return mutate_add_person(info, **user_args)
 
+class AddMarriage(gql.Mutation):
+    class Arguments:
+        man_id = gql.ID(required=True)
+        woman_id = gql.ID(required=True)
+        start_year = gql.Int()
+        end_year = gql.Int()
+
+    marriage = gql.Field(Marriage, required=True)
+
+    def mutate(self, info, **user_args):
+        return mutate_add_marriage(info, **user_args)
+
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
     person = gql.Field(Person, name=gql.String())
@@ -60,6 +75,7 @@ class Query(gql.ObjectType):
 
 class Mutation(gql.ObjectType):
     add_person = AddPerson.Field(required=True)
+    add_marriage = AddMarriage.Field(required=True)
 
 # Resolvers
 @resolver_for(Query, "person")
@@ -81,10 +97,24 @@ def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, de
         gender=gender,
         residence=residence,
         birth_year=birth_year,
-        death_year=death_year
+        death_year=death_year,
     )
     return AddPerson(person=neo_to_gql(Person, result))
 
+def mutate_add_marriage(info, *, man_id, woman_id, start_year=None, end_year=None):
+    man = database.get_node(man_id)
+    woman = database.get_node(woman_id)
+
+    assert man.get('gender') == gql_types.GenderType.MALE.value
+    assert woman.get('gender') == gql_types.GenderType.FEMALE.value
+
+    result = database.add_marriage(
+        person_a=man,
+        person_b=woman,
+        start_year=start_year,
+        end_year=end_year,
+    )
+    return AddMarriage(marriage=neo_to_gql(Marriage, result))
 
 schema = gql.Schema(query=Query, mutation=Mutation)
 
