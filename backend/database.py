@@ -29,9 +29,9 @@ def make_opaque_id(prefix):
     return prefix + "_" + val
 
 def get_node(opaque_id):
-    if opaque_id[:2] == "P":
+    if opaque_id[:2] == "P_":
         node_type = NodeType.PERSON.value
-    elif opaque_id[:2] == "M":
+    elif opaque_id[:2] == "M_":
         node_type = NodeType.MARRIAGE.value
     else:
         raise ValueError(f"I don't understand the id: {opaque_id}")
@@ -52,19 +52,19 @@ def search_persons(name):
 
 # Create new entries
 def add_person(name, gender, *, residence, birth_year, death_year):
-    person = Node(NodeType.PERSON.value, opaque_id=make_opaque_id("P_"), **locals())
+    person = Node(NodeType.PERSON.value, opaque_id=make_opaque_id("P"), **locals())
     graph.create(person)
     return person
 
 def add_marriage(person_a, person_b, *, start_year, end_year):
-    marriage = Node(NodeType.MARRIAGE.value, opaque_id=make_opaque_id("M_"), start_year=start_year, end_year=end_year)
+    marriage = Node(NodeType.MARRIAGE.value, opaque_id=make_opaque_id("M"), start_year=start_year, end_year=end_year)
     graph.create(marriage)
 
-    ma = Relationship(marriage, RelationshipType.PARTNER.value, person_a)
-    mb = Relationship(marriage, RelationshipType.PARTNER.value, person_b)
+    rel_ma = Relationship(marriage, RelationshipType.PARTNER.value, person_a)
+    rel_mb = Relationship(marriage, RelationshipType.PARTNER.value, person_b)
 
-    graph.create(ma)
-    graph.create(mb)
+    graph.create(rel_ma)
+    graph.create(rel_mb)
 
     return marriage
 
