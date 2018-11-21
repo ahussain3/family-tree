@@ -12,16 +12,12 @@ class NodeType(Enum):
     MARRIAGE = "Marriage"
 
 class RelationshipType(Enum):
-    PARTNER = "Partner"  # should go from 'marriage' node to 'person' node
-    CHILD = "Child"  # should go from 'marriage' to 'child'
+    PARTNER = "PARTNER"  # should go from 'marriage' node to 'person' node
+    CHILD = "CHILD"  # should go from 'marriage' to 'child'
 
 # To do: Constraints
 # graph.schema.create_uniqueness_constraint(NodeType.PERSON.value, 'opaque_id')
 # graph.schema.create_uniqueness_constraint(NodeType.MARRIAGE.value, 'opaque_id')
-
-# Relationships
-class Child(Relationship): pass
-class Partner(Relationship): pass
 
 def make_opaque_id(prefix):
     val = (
@@ -33,9 +29,9 @@ def make_opaque_id(prefix):
     return prefix + "_" + val
 
 def get_node(opaque_id):
-    if opaque_id[:2] == "P_":
+    if opaque_id[:2] == "P":
         node_type = NodeType.PERSON.value
-    elif opaque_id[:2] == "M_":
+    elif opaque_id[:2] == "M":
         node_type = NodeType.MARRIAGE.value
     else:
         raise ValueError(f"I don't understand the id: {opaque_id}")
@@ -48,6 +44,11 @@ def get_node(opaque_id):
     assert len(result) == 1, f"More than one record with the same id: {opaque_id}"
 
     return result.first()
+
+def search_persons(name):
+    matcher = NodeMatcher(graph)
+    result = matcher.match(NodeType.PERSON.value, name__contains=name).limit(10)
+    return list(result)
 
 # Create new entries
 def add_person(name, gender, *, residence, birth_year, death_year):
@@ -67,7 +68,8 @@ def add_marriage(person_a, person_b, *, start_year, end_year):
 
     return marriage
 
-def search_persons(name):
-    matcher = NodeMatcher(graph)
-    result = matcher.match(NodeType.PERSON.value, name__contains=name).limit(10)
-    return list(result)
+def add_child(marriage, child):
+    rel = Relationship(marriage, RelationshipType.CHILD.value, child)
+    graph.create(rel)
+
+    return marriage

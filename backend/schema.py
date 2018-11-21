@@ -68,6 +68,16 @@ class AddMarriage(gql.Mutation):
     def mutate(self, info, **user_args):
         return mutate_add_marriage(info, **user_args)
 
+class AddChild(gql.Mutation):
+    class Arguments:
+        marriage_id = gql.ID(required=True)
+        child_id = gql.ID(required=True)
+
+    marriage = gql.Field(Marriage, required=True)
+
+    def mutate(self, info, **user_args):
+        return mutate_add_child(info, **user_args)
+
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
     person = gql.Field(Person, name=gql.String())
@@ -76,6 +86,7 @@ class Query(gql.ObjectType):
 class Mutation(gql.ObjectType):
     add_person = AddPerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
+    add_child = AddChild.Field(required=True)
 
 # Resolvers
 @resolver_for(Query, "person")
@@ -115,6 +126,16 @@ def mutate_add_marriage(info, *, man_id, woman_id, start_year=None, end_year=Non
         end_year=end_year,
     )
     return AddMarriage(marriage=neo_to_gql(Marriage, result))
+
+def mutate_add_child(info, *, marriage_id, child_id):
+    marriage = database.get_node(marriage_id)
+    child = database.get_node(child_id)
+
+    result = database.add_child(
+        marriage=marriage,
+        child=child
+    )
+    return AddChild(marriage=neo_to_gql(Marriage, result))
 
 schema = gql.Schema(query=Query, mutation=Mutation)
 
