@@ -12,10 +12,10 @@ class NodeType(Enum):
     MARRIAGE = "Marriage"
 
 class RelationshipType(Enum):
-    PARTNER = "PARTNER"  # should go from 'marriage' node to 'person' node
-    CHILD = "CHILD"  # should go from 'marriage' to 'child'
+    PARTNER = "PARTNER"  # should go from 'Marriage' node to 'Person' node
+    CHILD = "CHILD"  # should go from 'Marriage' to 'Person' node
 
-# To do: Constraints
+# To do(Awais): Constraints
 # graph.schema.create_uniqueness_constraint(NodeType.PERSON.value, 'opaque_id')
 # graph.schema.create_uniqueness_constraint(NodeType.MARRIAGE.value, 'opaque_id')
 

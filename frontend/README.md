@@ -1,3 +1,29 @@
+
+To run the app:
+`yarn run start`
+
+To update the schema:
+`get-graphql-schema http://127.0.0.1:5000/graphql > ./schema.graphql`
+from within this folder
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

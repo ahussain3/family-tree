@@ -1,0 +1,48 @@
+type AddChild {
+  marriage: Marriage!
+}
+
+type AddMarriage {
+  marriage: Marriage!
+}
+
+type AddPerson {
+  person: Person!
+}
+
+"""An enumeration."""
+enum Gender {
+  MALE
+  FEMALE
+}
+
+"""A marriage between two people"""
+type Marriage {
+  id: ID!
+  startYear: Int
+  endYear: Int
+}
+
+type Mutation {
+  addPerson(birthYear: Int, deathYear: Int, gender: Gender!, name: String!, residence: String): AddPerson!
+  addMarriage(endYear: Int, manId: ID!, startYear: Int, womanId: ID!): AddMarriage!
+  addChild(childId: ID!, marriageId: ID!): AddChild!
+}
+
+"""A person in the family tree"""
+type Person {
+  id: ID!
+  name: String!
+  gender: Gender
+  photoUrl: String
+  residence: String
+  birthYear: Int
+  deathYear: Int
+}
+
+"""Top level GraphQL queryable objects"""
+type Query {
+  person(name: String): Person
+  searchPersons(name: String): [Person]
+}
+
