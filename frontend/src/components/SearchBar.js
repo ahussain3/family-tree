@@ -1,19 +1,17 @@
 import React from 'react';
-import {FormControl} from 'react-bootstrap';
-import {
-    createFragmentContainer,
-    graphql
-  } from 'react-relay';
-import {Typeahead} from 'react-bootstrap-typeahead';
+import {createRefetchContainer, graphql} from 'react-relay';
+import {AsyncTypeahead} from 'react-bootstrap-typeahead';
 
-export class SearchBar extends React.Component {
+class SearchBarComponent extends React.Component {
     constructor(props, context) {
         super(props, context);
 
         this.handleChange = this.handleChange.bind(this);
+        this.handleSearch = this.handleSearch.bind(this);
 
         this.state = {
-          value: ''
+          searchText: '',
+          selected: null
         };
     }
 
@@ -22,17 +20,36 @@ export class SearchBar extends React.Component {
         // this.setState({ value: e.target.value });
     }
 
+    handleSearch(query) {
+        this.props.relay.refetch(
+            {name: query},
+            null,
+            () => {console.log("Research completed")},
+            {}
+        )
+    }
+
     render() {
-        return <Typeahead
-            onChange={this.handleChange}
-            options={["Andy", "James", "Zahid"]}
-            selected={this.state.selected}
+        return <AsyncTypeahead
+            minLength={3}
+            onSearch={this.handleSearch}
+            placeholder="Search for a person..."
         />
-        // return <FormControl
-        //     type="text"
-        //     value={this.state.value}
-        //     placeholder="Enter text"
-        //     onChange={this.handleChange}
-        // />
     }
 }
+
+export const SearchBar = createRefetchContainer(SearchBarComponent, graphql`
+    fragment SearchBar_person on Person {
+        id
+        name
+        residence
+        birthYear
+        deathYear
+    }`, graphql `
+    query SearchBarQuery($name: String!) {
+        searchPersons(name: $name) {
+            ...SearchBar_person
+        }
+    }
+    `
+)

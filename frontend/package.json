@@ -72,6 +72,7 @@
   ],
   "devDependencies": {
     "babel-plugin-relay": "^1.7.0",
+    "graphql": "^14.0.2",
     "relay-compiler": "^1.7.0"
   },
   "jest": {

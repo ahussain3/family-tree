@@ -47,7 +47,7 @@ def get_node(opaque_id):
 
 def search_persons(name):
     matcher = NodeMatcher(graph)
-    result = matcher.match(NodeType.PERSON.value, name__contains=name).limit(10)
+    result = matcher.match(NodeType.PERSON.value).where(f"_.name =~ '.*(?i){name}.*'").limit(10)
     return list(result)
 
 # Create new entries
