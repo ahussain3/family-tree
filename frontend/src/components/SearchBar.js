@@ -29,7 +29,7 @@ export class SearchBar extends React.Component {
     }
 
     onSelected = (selection) => {
-        if (selection === undefined || selection.length == 0) {
+        if (selection === undefined || selection.length === 0) {
             this.props.setRootPerson(null)
             return
         }

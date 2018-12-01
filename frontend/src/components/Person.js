@@ -3,8 +3,20 @@ import {createFragmentContainer, graphql} from 'react-relay';
 
 class Person extends React.Component {
     render () {
-        debugger
-        return <h1>{this.props.person.name}</h1>
+        if (this.props.person == null) {
+            return <div className="person"></div>
+        }
+
+        let lifespan = ""
+        if (this.props.person.birthYear) {
+            lifespan = this.props.person.birthYear + "-" + (this.props.person.deathYear || "")
+        }
+
+        return <div className="person">
+            <h1>{this.props.person.name}</h1>
+            <h2>{this.props.person.residence || ""}</h2>
+            <p>{lifespan}</p>
+        </div>
     }
 }
 
@@ -14,5 +26,7 @@ export default createFragmentContainer(Person,
             id
             name
             residence
+            birthYear
+            deathYear
         }
     `);

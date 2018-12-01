@@ -81,7 +81,7 @@ class AddChild(gql.Mutation):
 
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
-    person = gql.Field(Person, name=gql.String())
+    person = gql.Field(Person, id=gql.ID())
     search_persons = gql.Field(gql.List(Person), name=gql.String())
 
 class Mutation(gql.ObjectType):
@@ -91,11 +91,9 @@ class Mutation(gql.ObjectType):
 
 # Resolvers
 @resolver_for(Query, "person")
-def query_person(self, info, *, name):
-    return Person(
-        name="Blah",
-        gender=gql_types.GenderType.MALE
-    )
+def query_person(self, info, *, id):
+    person = database.get_node(id)
+    return neo_to_gql(Person, person)
 
 @resolver_for(Query, "search_persons")
 def query_search_persons(self, info, *, name):
