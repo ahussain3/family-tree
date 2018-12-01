@@ -6,6 +6,7 @@ import environment from '../relay.js';
 const query = graphql`
     query SearchBarQuery($name: String!) {
         searchPersons(name: $name) {
+            id
             name
             residence
             birthYear
@@ -21,10 +22,18 @@ export class SearchBar extends React.Component {
         };
     }
 
-    renderResults = (persons) => {
-        return persons.map(
+    renderMenu = (results, menuProps) => {
+        return results.map(
             (person) => {return person.name}
         )
+    }
+
+    onSelected = (selection) => {
+        if (selection === undefined || selection.length == 0) {
+            this.props.setRootPerson(null)
+            return
+        }
+        this.props.setRootPerson(selection[0].id)
     }
 
     innerRender = (readyState) => {
@@ -34,10 +43,12 @@ export class SearchBar extends React.Component {
         return <AsyncTypeahead
             minLength={3}
             onSearch={(query) => {this.setState({searchText: query})}}
-            onChange={(selected) => {this.props.setRootPerson(selected[0] || null)}}
+            onChange={(selected) => {this.onSelected(selected)}}
             placeholder="Search for a person..."
             isLoading={isLoading}
-            options={this.renderResults(props && props.searchPersons ? props.searchPersons : [])}
+            options={props && props.searchPersons ? props.searchPersons : []}
+            filterBy={['name']}
+            labelKey={'name'}
         />
     }
 

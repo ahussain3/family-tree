@@ -12,8 +12,8 @@ class App extends Component {
     };
   }
 
-  setRootPerson = (name) => {
-    this.setState({rootPerson: name})
+  setRootPerson = (id) => {
+    this.setState({rootPerson: id})
   }
 
   render() {
@@ -30,7 +30,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <TreeView name={this.state.rootPerson}></TreeView>
+            <TreeView id={this.state.rootPerson}></TreeView>
           </Col>
         </Row>
       </Container>
