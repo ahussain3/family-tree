@@ -34,6 +34,7 @@ export class SearchBar extends React.Component {
         return <AsyncTypeahead
             minLength={3}
             onSearch={(query) => {this.setState({searchText: query})}}
+            onChange={(selected) => {this.props.setRootPerson(selected[0] || null)}}
             placeholder="Search for a person..."
             isLoading={isLoading}
             options={this.renderResults(props && props.searchPersons ? props.searchPersons : [])}
