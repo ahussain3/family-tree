@@ -4,7 +4,7 @@ import {createFragmentContainer, graphql} from 'react-relay';
 class Person extends React.Component {
     render () {
         if (this.props.person == null) {
-            return <div className="person"></div>
+            return <div></div>
         }
 
         let lifespan = ""

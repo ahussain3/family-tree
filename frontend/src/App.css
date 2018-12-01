@@ -30,3 +30,22 @@
     transform: rotate(360deg);
   }
 }
+
+.person {
+  border: 2px solid lightblue;
+  width: 150px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.person > h1 {
+  font-size: 1.2em;
+}
+
+.person > h2 {
+  font-size: 1em;
+}
+
+.person > p {
+  font-size: 0.9em;
+}
