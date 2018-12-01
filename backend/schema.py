@@ -49,6 +49,21 @@ class AddPerson(gql.Mutation):
     def mutate(self, info, **user_args):
         return mutate_add_person(info, **user_args)
 
+class UpdatePerson(gql.Mutation):
+    class Arguments:
+        id = gql.ID(required=True)
+        name = gql.String()
+        gender = GenderType()
+        residence = gql.String()
+        birth_year = gql.Int()
+        death_year = gql.Int()
+
+    person = gql.Field(Person, required=True)
+
+    def mutate(self, info, **user_args):
+        return mutate_update_person(info, **user_args)
+
+
 class AddMarriage(gql.Mutation):
     class Arguments:
         partner_a_id = gql.ID(required=True)
@@ -79,6 +94,7 @@ class Query(gql.ObjectType):
 
 class Mutation(gql.ObjectType):
     add_person = AddPerson.Field(required=True)
+    update_person = UpdatePerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
     add_child = AddChild.Field(required=True)
 
@@ -106,6 +122,12 @@ def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, de
         death_year=death_year,
     )
     return AddPerson(person=neo_to_gql(Person, result))
+
+def mutate_update_person(info, *, id, name=None, gender=None, residence=None, birth_year=None, death_year=None):
+    args = locals().copy()
+    args.pop("info", None)
+    person = database.update_person(**args)
+    return UpdatePerson(person=neo_to_gql(Person, person))
 
 def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, end_year=None):
     partner_a = database.get_node(partner_a_id)

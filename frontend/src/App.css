@@ -36,6 +36,7 @@
   width: 150px;
   padding: 10px;
   border-radius: 10px;
+  text-align: center;
 }
 
 .person > h1 {
@@ -48,4 +49,5 @@
 
 .person > p {
   font-size: 0.9em;
+  margin-bottom: 0px;
 }

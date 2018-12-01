@@ -56,6 +56,12 @@ def add_person(name, gender, *, residence, birth_year, death_year):
     graph.create(person)
     return person
 
+def update_person(id, **kwargs):
+    person = get_node(id)
+    person.update({k:v for k,v in kwargs.items() if v is not None})
+    graph.push(person)
+    return person
+
 def add_marriage(person_a, person_b, *, start_year, end_year):
     rel = Relationship(person_a, RelationshipType.PARTNER.value, person_b, start_year=start_year, end_year=end_year)
     graph.create(rel)
