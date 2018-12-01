@@ -1,55 +1,51 @@
 import React from 'react';
-import {createRefetchContainer, graphql} from 'react-relay';
+import {QueryRenderer, graphql} from 'react-relay';
 import {AsyncTypeahead} from 'react-bootstrap-typeahead';
+import environment from '../relay.js';
 
-class SearchBarComponent extends React.Component {
+const query = graphql`
+    query SearchBarQuery($name: String!) {
+        searchPersons(name: $name) {
+            name
+            residence
+            birthYear
+            deathYear
+        }
+    }
+`
+export class SearchBar extends React.Component {
     constructor(props, context) {
         super(props, context);
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSearch = this.handleSearch.bind(this);
-
         this.state = {
           searchText: '',
-          selected: null
         };
     }
 
-    handleChange(selected) {
-        this.setState({selected})
-        // this.setState({ value: e.target.value });
-    }
-
-    handleSearch(query) {
-        this.props.relay.refetch(
-            {name: query},
-            null,
-            () => {console.log("Research completed")},
-            {}
+    renderResults = (persons) => {
+        return persons.map(
+            (person) => {return person.name}
         )
     }
 
-    render() {
+    innerRender = (readyState) => {
+        let {error, props} = readyState
+        let isLoading = (error == null && props == null);
+
         return <AsyncTypeahead
             minLength={3}
-            onSearch={this.handleSearch}
+            onSearch={(query) => {this.setState({searchText: query})}}
             placeholder="Search for a person..."
+            isLoading={isLoading}
+            options={this.renderResults(props && props.searchPersons ? props.searchPersons : [])}
+        />
+    }
+
+    render() {
+        return <QueryRenderer
+            environment={environment}
+            render={this.innerRender}
+            query={this.state.searchText.length > 0 ? query : null}
+            variables={{name: this.state.searchText}}
         />
     }
 }
-
-export const SearchBar = createRefetchContainer(SearchBarComponent, graphql`
-    fragment SearchBar_person on Person {
-        id
-        name
-        residence
-        birthYear
-        deathYear
-    }`, graphql `
-    query SearchBarQuery($name: String!) {
-        searchPersons(name: $name) {
-            ...SearchBar_person
-        }
-    }
-    `
-)

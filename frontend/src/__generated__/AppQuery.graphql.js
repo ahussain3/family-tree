@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 449339b852739595d67c15428ba84f38
+ * @relayHash 5d7ea2dbad9ee1e3def708b43a9108f7
  */
 
 /* eslint-disable */
@@ -11,9 +11,11 @@
 import type { ConcreteRequest } from 'relay-runtime';
 export type AppQueryVariables = {||};
 export type AppQueryResponse = {|
-  +searchPersons: ?$ReadOnlyArray<?{|
-    +name: string
-  |}>
+  +searchPersons: ?{|
+    +persons: $ReadOnlyArray<?{|
+      +name: string
+    |}>
+  |}
 |};
 export type AppQuery = {|
   variables: AppQueryVariables,
@@ -25,8 +27,10 @@ export type AppQuery = {|
 /*
 query AppQuery {
   searchPersons(name: "Zahid") {
-    name
-    id
+    persons {
+      name
+      id
+    }
   }
 }
 */
@@ -52,7 +56,7 @@ return {
   "operationKind": "query",
   "name": "AppQuery",
   "id": null,
-  "text": "query AppQuery {\n  searchPersons(name: \"Zahid\") {\n    name\n    id\n  }\n}\n",
+  "text": "query AppQuery {\n  searchPersons(name: \"Zahid\") {\n    persons {\n      name\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -67,10 +71,21 @@ return {
         "name": "searchPersons",
         "storageKey": "searchPersons(name:\"Zahid\")",
         "args": v0,
-        "concreteType": "Person",
-        "plural": true,
+        "concreteType": "Persons",
+        "plural": false,
         "selections": [
-          v1
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "persons",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Person",
+            "plural": true,
+            "selections": [
+              v1
+            ]
+          }
         ]
       }
     ]
@@ -86,16 +101,27 @@ return {
         "name": "searchPersons",
         "storageKey": "searchPersons(name:\"Zahid\")",
         "args": v0,
-        "concreteType": "Person",
-        "plural": true,
+        "concreteType": "Persons",
+        "plural": false,
         "selections": [
-          v1,
           {
-            "kind": "ScalarField",
+            "kind": "LinkedField",
             "alias": null,
-            "name": "id",
+            "name": "persons",
+            "storageKey": null,
             "args": null,
-            "storageKey": null
+            "concreteType": "Person",
+            "plural": true,
+            "selections": [
+              v1,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "id",
+                "args": null,
+                "storageKey": null
+              }
+            ]
           }
         ]
       }
@@ -104,5 +130,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '46f04c44a6f187c8ebaf89b814459b64';
+(node/*: any*/).hash = '91ed6e483e5cee022e541bfa324ebb2b';
 module.exports = node;

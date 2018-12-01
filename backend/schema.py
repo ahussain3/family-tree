@@ -1,6 +1,7 @@
 import graphene as gql
 import gql_types
 import database
+import random
 
 def resolver_for(cls, name):
     def decorator(f):
@@ -17,7 +18,7 @@ def mutator_for(cls):
 
 def neo_to_gql(cls, object):
     fields = {field: object.get(field) for field in cls._meta.fields.keys()}
-    fields['id'] = object.get('opaque_id')
+    fields['id'] = object.get('opaque_id', str(random.randint(0,5000)))
     return cls(**fields)
 
 # Object Types

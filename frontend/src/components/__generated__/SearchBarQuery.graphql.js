@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7af618aca7362f81e460eef4ec6f325b
+ * @relayHash 6995dcd3af2194ea46841e8a38f07c07
  */
 
 /* eslint-disable */
@@ -9,13 +9,15 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type SearchBar_person$ref = any;
 export type SearchBarQueryVariables = {|
   name: string
 |};
 export type SearchBarQueryResponse = {|
   +searchPersons: ?$ReadOnlyArray<?{|
-    +$fragmentRefs: SearchBar_person$ref
+    +name: string,
+    +residence: ?string,
+    +birthYear: ?number,
+    +deathYear: ?number,
   |}>
 |};
 export type SearchBarQuery = {|
@@ -30,17 +32,12 @@ query SearchBarQuery(
   $name: String!
 ) {
   searchPersons(name: $name) {
-    ...SearchBar_person
+    name
+    residence
+    birthYear
+    deathYear
     id
   }
-}
-
-fragment SearchBar_person on Person {
-  id
-  name
-  residence
-  birthYear
-  deathYear
 }
 */
 
@@ -60,13 +57,41 @@ v1 = [
     "variableName": "name",
     "type": "String"
   }
-];
+],
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "residence",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "birthYear",
+  "args": null,
+  "storageKey": null
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "deathYear",
+  "args": null,
+  "storageKey": null
+};
 return {
   "kind": "Request",
   "operationKind": "query",
   "name": "SearchBarQuery",
   "id": null,
-  "text": "query SearchBarQuery(\n  $name: String!\n) {\n  searchPersons(name: $name) {\n    ...SearchBar_person\n    id\n  }\n}\n\nfragment SearchBar_person on Person {\n  id\n  name\n  residence\n  birthYear\n  deathYear\n}\n",
+  "text": "query SearchBarQuery(\n  $name: String!\n) {\n  searchPersons(name: $name) {\n    name\n    residence\n    birthYear\n    deathYear\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -84,11 +109,10 @@ return {
         "concreteType": "Person",
         "plural": true,
         "selections": [
-          {
-            "kind": "FragmentSpread",
-            "name": "SearchBar_person",
-            "args": null
-          }
+          v2,
+          v3,
+          v4,
+          v5
         ]
       }
     ]
@@ -107,38 +131,14 @@ return {
         "concreteType": "Person",
         "plural": true,
         "selections": [
+          v2,
+          v3,
+          v4,
+          v5,
           {
             "kind": "ScalarField",
             "alias": null,
             "name": "id",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "name",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "residence",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "birthYear",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "deathYear",
             "args": null,
             "storageKey": null
           }
@@ -149,5 +149,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '82d6001a7adaf09fb61c78bdeb7613f0';
+(node/*: any*/).hash = '584085741e3624542482b5be3f79ad74';
 module.exports = node;

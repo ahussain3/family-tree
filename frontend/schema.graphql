@@ -10,13 +10,13 @@ type AddPerson {
   person: Person!
 }
 
-"""An enumeration."""
+# An enumeration.
 enum Gender {
   MALE
   FEMALE
 }
 
-"""A marriage between two people"""
+# A marriage between two people
 type Marriage {
   id: ID!
   startYear: Int
@@ -29,7 +29,7 @@ type Mutation {
   addChild(childId: ID!, marriageId: ID!): AddChild!
 }
 
-"""A person in the family tree"""
+# A person in the family tree
 type Person {
   id: ID!
   name: String!
@@ -40,7 +40,7 @@ type Person {
   deathYear: Int
 }
 
-"""Top level GraphQL queryable objects"""
+# Top level GraphQL queryable objects
 type Query {
   person(name: String): Person
   searchPersons(name: String): [Person]
