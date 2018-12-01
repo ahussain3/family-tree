@@ -57,19 +57,11 @@ def add_person(name, gender, *, residence, birth_year, death_year):
     return person
 
 def add_marriage(person_a, person_b, *, start_year, end_year):
-    marriage = Node(NodeType.MARRIAGE.value, opaque_id=make_opaque_id("M"), start_year=start_year, end_year=end_year)
-    graph.create(marriage)
-
-    rel_ma = Relationship(marriage, RelationshipType.PARTNER.value, person_a)
-    rel_mb = Relationship(marriage, RelationshipType.PARTNER.value, person_b)
-
-    graph.create(rel_ma)
-    graph.create(rel_mb)
-
-    return marriage
-
-def add_child(marriage, child):
-    rel = Relationship(marriage, RelationshipType.CHILD.value, child)
+    rel = Relationship(person_a, RelationshipType.PARTNER.value, person_b, start_year=start_year, end_year=end_year)
     graph.create(rel)
+    return (person_a, person_b)
 
-    return marriage
+def add_child(parent, child):
+    rel = Relationship(parent, RelationshipType.CHILD.value, child)
+    graph.create(rel)
+    return (parent, child)

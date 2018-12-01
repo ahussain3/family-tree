@@ -1,5 +1,5 @@
 import graphene as gql
-import gql_types
+from gql_types import GenderType
 import database
 import random
 
@@ -26,28 +26,20 @@ class Person(gql.ObjectType):
     """A person in the family tree"""
     id = gql.ID(required=True)
     name = gql.String(required=True)
-    gender = gql_types.GenderType()
+    gender = GenderType()
     photo_url = gql.String()
     residence = gql.String()
     birth_year = gql.Int()
     death_year = gql.Int()
     # siblings = gql.List(Person)
     # parents = gql.List(Person)
-    # marriages = gql.List(Marriage)
-
-class Marriage(gql.ObjectType):
-    """A marriage between two people"""
-    id = gql.ID(required=True)
-    # man = gql.Field(Person)
-    # woman = gql.Field(Person)
-    start_year = gql.Int()
-    end_year = gql.Int()
+    # partners = gql.List(Person)
     # children = gql.List(Person)
 
 class AddPerson(gql.Mutation):
     class Arguments:
         name = gql.String(required=True)
-        gender = gql_types.GenderType(required=True)
+        gender = GenderType(required=True)
         residence = gql.String()
         birth_year = gql.Int()
         death_year = gql.Int()
@@ -59,22 +51,23 @@ class AddPerson(gql.Mutation):
 
 class AddMarriage(gql.Mutation):
     class Arguments:
-        man_id = gql.ID(required=True)
-        woman_id = gql.ID(required=True)
+        partner_a_id = gql.ID(required=True)
+        partner_b_id = gql.ID(required=True)
         start_year = gql.Int()
         end_year = gql.Int()
 
-    marriage = gql.Field(Marriage, required=True)
+    partner_a = gql.Field(Person, required=True)
+    partner_b = gql.Field(Person, required=True)
 
     def mutate(self, info, **user_args):
         return mutate_add_marriage(info, **user_args)
 
 class AddChild(gql.Mutation):
     class Arguments:
-        marriage_id = gql.ID(required=True)
+        parent_ids = gql.List(gql.ID, required=True)
         child_id = gql.ID(required=True)
 
-    marriage = gql.Field(Marriage, required=True)
+    child = gql.Field(Person, required=True)
 
     def mutate(self, info, **user_args):
         return mutate_add_child(info, **user_args)
@@ -88,6 +81,9 @@ class Mutation(gql.ObjectType):
     add_person = AddPerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
     add_child = AddChild.Field(required=True)
+
+
+
 
 # Resolvers
 @resolver_for(Query, "person")
@@ -111,30 +107,34 @@ def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, de
     )
     return AddPerson(person=neo_to_gql(Person, result))
 
-def mutate_add_marriage(info, *, man_id, woman_id, start_year=None, end_year=None):
-    man = database.get_node(man_id)
-    woman = database.get_node(woman_id)
-
-    assert man.get('gender') == gql_types.GenderType.MALE.value
-    assert woman.get('gender') == gql_types.GenderType.FEMALE.value
+def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, end_year=None):
+    partner_a = database.get_node(partner_a_id)
+    partner_b = database.get_node(partner_b_id)
 
     result = database.add_marriage(
-        person_a=man,
-        person_b=woman,
+        person_a=partner_a,
+        person_b=partner_b,
         start_year=start_year,
         end_year=end_year,
     )
-    return AddMarriage(marriage=neo_to_gql(Marriage, result))
+    partner_a, partner_b = (neo_to_gql(Person, person) for person in result)
 
-def mutate_add_child(info, *, marriage_id, child_id):
-    marriage = database.get_node(marriage_id)
+    return AddMarriage(partner_a=partner_a, partner_b=partner_b)
+
+def mutate_add_child(info, *, parent_ids, child_id):
     child = database.get_node(child_id)
 
-    result = database.add_child(
-        marriage=marriage,
-        child=child
-    )
-    return AddChild(marriage=neo_to_gql(Marriage, result))
+    for parent_id in parent_ids:
+        assert child_id != parent_id, "A person cannot be their own child"
+
+        parent = database.get_node(parent_id)
+
+        database.add_child(
+            parent=parent,
+            child=child
+        )
+
+    return AddChild(child=neo_to_gql(Person, child))
 
 schema = gql.Schema(query=Query, mutation=Mutation)
 
