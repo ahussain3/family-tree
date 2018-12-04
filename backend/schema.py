@@ -32,9 +32,9 @@ class Person(gql.ObjectType):
     birth_year = gql.Int()
     death_year = gql.Int()
     parents = gql.List(lambda: Person)
-    # siblings = gql.List(Person)
-    # partners = gql.List(Person)
-    # children = gql.List(Person)
+    # siblings = gql.List(lambda: Person)
+    partners = gql.List(lambda: Person)
+    children = gql.List(lambda: Person)
 
 class AddPerson(gql.Mutation):
     class Arguments:
@@ -115,6 +115,16 @@ def query_search_persons(self, info, *, name):
 @resolver_for(Person, "parents")
 def person_parents(self, info):
     result = database.get_parents(self.id)
+    return [neo_to_gql(Person, person) for person in result]
+
+@resolver_for(Person, "children")
+def person_children(self, info):
+    result = database.get_children(self.id)
+    return [neo_to_gql(Person, person) for person in result]
+
+@resolver_for(Person, "partners")
+def person_partners(self, info):
+    result = database.get_partners(self.id)
     return [neo_to_gql(Person, person) for person in result]
 
 # Mutators

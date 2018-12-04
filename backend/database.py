@@ -46,11 +46,22 @@ def get_node(opaque_id):
 
     return result.first()
 
-def get_parents(opaque_id):
+def get_relationship(opaque_id, rel_type):
     person = get_node(opaque_id)
     matcher = RelationshipMatcher(graph)
-    result = [p.end_node for p in matcher.match([person], RelationshipType.PARENT.value)]
+    return [p.end_node for p in matcher.match([person], rel_type)]
+
+def get_parents(opaque_id):
+    result = get_relationship(opaque_id, RelationshipType.PARENT.value)
     return sorted(result, key=lambda p: p["gender"], reverse=True)
+
+def get_children(opaque_id):
+    result = get_relationship(opaque_id, RelationshipType.CHILD.value)
+    return sorted(result, key=lambda p: p["birth_year"])
+
+def get_partners(opaque_id):
+    result = get_relationship(opaque_id, RelationshipType.PARTNER.value)
+    return sorted(result, key=lambda p: p["birth_year"])
 
 def search_persons(name):
     matcher = NodeMatcher(graph)
