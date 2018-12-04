@@ -2,7 +2,7 @@ import base64
 import secrets
 from enum import Enum
 
-from py2neo import Node, Graph, Relationship, NodeMatcher
+from py2neo import Node, Graph, Relationship, NodeMatcher, RelationshipMatcher
 
 graph = Graph("bolt://localhost:7687", auth=('neo4j', 'banana01'))
 
@@ -14,6 +14,7 @@ class NodeType(Enum):
 class RelationshipType(Enum):
     PARTNER = "PARTNER"  # should go from 'Marriage' node to 'Person' node
     CHILD = "CHILD"  # should go from 'Marriage' to 'Person' node
+    PARENT = "PARENT"
 
 # To do(Awais): Constraints
 # graph.schema.create_uniqueness_constraint(NodeType.PERSON.value, 'opaque_id')
@@ -45,6 +46,12 @@ def get_node(opaque_id):
 
     return result.first()
 
+def get_parents(opaque_id):
+    person = get_node(opaque_id)
+    matcher = RelationshipMatcher(graph)
+    result = [p.end_node for p in matcher.match([person], RelationshipType.PARENT.value)]
+    return sorted(result, key=lambda p: p["gender"], reverse=True)
+
 def search_persons(name):
     matcher = NodeMatcher(graph)
     result = matcher.match(NodeType.PERSON.value).where(f"_.name =~ '.*(?i){name}.*'").limit(10)
@@ -63,11 +70,19 @@ def update_person(id, **kwargs):
     return person
 
 def add_marriage(person_a, person_b, *, start_year, end_year):
-    rel = Relationship(person_a, RelationshipType.PARTNER.value, person_b, start_year=start_year, end_year=end_year)
-    graph.create(rel)
+    rel_a = Relationship(person_a, RelationshipType.PARTNER.value, person_b, start_year=start_year, end_year=end_year)
+    rel_b = Relationship(person_b, RelationshipType.PARTNER.value, person_a, start_year=start_year, end_year=end_year)
+
+    graph.create(rel_a)
+    graph.create(rel_b)
+
     return (person_a, person_b)
 
 def add_child(parent, child):
-    rel = Relationship(parent, RelationshipType.CHILD.value, child)
-    graph.create(rel)
+    rel_a = Relationship(parent, RelationshipType.CHILD.value, child)
+    rel_b = Relationship(child, RelationshipType.PARENT.value, parent)
+
+    graph.create(rel_a)
+    graph.create(rel_b)
+
     return (parent, child)
