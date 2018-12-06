@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 146ef8e0b76f072fd6d6030a9d4c3df5
+ * @relayHash 3ba900cb794b03a2f0a6cab627731107
  */
 
 /* eslint-disable */
@@ -15,7 +15,10 @@ export type TreeViewRootQueryVariables = {|
 |};
 export type TreeViewRootQueryResponse = {|
   +person: ?{|
-    +$fragmentRefs: Person_person$ref
+    +partners: ?$ReadOnlyArray<?{|
+      +$fragmentRefs: Person_person$ref
+    |}>,
+    +$fragmentRefs: Person_person$ref,
   |}
 |};
 export type TreeViewRootQuery = {|
@@ -31,6 +34,10 @@ query TreeViewRootQuery(
 ) {
   person(id: $id) {
     ...Person_person
+    partners {
+      ...Person_person
+      id
+    }
     id
   }
 }
@@ -38,6 +45,7 @@ query TreeViewRootQuery(
 fragment Person_person on Person {
   id
   name
+  gender
   residence
   birthYear
   deathYear
@@ -60,13 +68,60 @@ v1 = [
     "variableName": "id",
     "type": "ID"
   }
-];
+],
+v2 = {
+  "kind": "FragmentSpread",
+  "name": "Person_person",
+  "args": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "gender",
+  "args": null,
+  "storageKey": null
+},
+v6 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "residence",
+  "args": null,
+  "storageKey": null
+},
+v7 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "birthYear",
+  "args": null,
+  "storageKey": null
+},
+v8 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "deathYear",
+  "args": null,
+  "storageKey": null
+};
 return {
   "kind": "Request",
   "operationKind": "query",
   "name": "TreeViewRootQuery",
   "id": null,
-  "text": "query TreeViewRootQuery(\n  $id: ID!\n) {\n  person(id: $id) {\n    ...Person_person\n    id\n  }\n}\n\nfragment Person_person on Person {\n  id\n  name\n  residence\n  birthYear\n  deathYear\n}\n",
+  "text": "query TreeViewRootQuery(\n  $id: ID!\n) {\n  person(id: $id) {\n    ...Person_person\n    partners {\n      ...Person_person\n      id\n    }\n    id\n  }\n}\n\nfragment Person_person on Person {\n  id\n  name\n  gender\n  residence\n  birthYear\n  deathYear\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -84,10 +139,18 @@ return {
         "concreteType": "Person",
         "plural": false,
         "selections": [
+          v2,
           {
-            "kind": "FragmentSpread",
-            "name": "Person_person",
-            "args": null
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "partners",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Person",
+            "plural": true,
+            "selections": [
+              v2
+            ]
           }
         ]
       }
@@ -107,40 +170,28 @@ return {
         "concreteType": "Person",
         "plural": false,
         "selections": [
+          v3,
+          v4,
+          v5,
+          v6,
+          v7,
+          v8,
           {
-            "kind": "ScalarField",
+            "kind": "LinkedField",
             "alias": null,
-            "name": "id",
+            "name": "partners",
+            "storageKey": null,
             "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "name",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "residence",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "birthYear",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "deathYear",
-            "args": null,
-            "storageKey": null
+            "concreteType": "Person",
+            "plural": true,
+            "selections": [
+              v3,
+              v4,
+              v5,
+              v6,
+              v7,
+              v8
+            ]
           }
         ]
       }
@@ -149,5 +200,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'de5965eace58d5093bb978bf4c23d41c';
+(node/*: any*/).hash = '5053cb385fef78c7dd2c69e9358af2c7';
 module.exports = node;

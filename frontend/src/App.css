@@ -37,6 +37,7 @@
   padding: 10px;
   border-radius: 10px;
   text-align: center;
+  margin: 10px;
 }
 
 .person > h1 {
@@ -50,4 +51,15 @@
 .person > p {
   font-size: 0.9em;
   margin-bottom: 0px;
+}
+
+/* Layout */
+.flex-container {
+  display: flex;
+  justify-content: center;
+}
+
+.flex-item {
+  display: flex;
+  justify-content: space-between;
 }

@@ -1,9 +1,10 @@
 type AddChild {
-  marriage: Marriage!
+  child: Person!
 }
 
 type AddMarriage {
-  marriage: Marriage!
+  partnerA: Person!
+  partnerB: Person!
 }
 
 type AddPerson {
@@ -16,17 +17,11 @@ enum Gender {
   FEMALE
 }
 
-"""A marriage between two people"""
-type Marriage {
-  id: ID!
-  startYear: Int
-  endYear: Int
-}
-
 type Mutation {
   addPerson(birthYear: Int, deathYear: Int, gender: Gender!, name: String!, residence: String): AddPerson!
-  addMarriage(endYear: Int, manId: ID!, startYear: Int, womanId: ID!): AddMarriage!
-  addChild(childId: ID!, marriageId: ID!): AddChild!
+  updatePerson(birthYear: Int, deathYear: Int, gender: Gender, id: ID!, name: String, residence: String): UpdatePerson!
+  addMarriage(endYear: Int, partnerAId: ID!, partnerBId: ID!, startYear: Int): AddMarriage!
+  addChild(childId: ID!, parentIds: [ID]!): AddChild!
 }
 
 """A person in the family tree"""
@@ -38,11 +33,18 @@ type Person {
   residence: String
   birthYear: Int
   deathYear: Int
+  parents: [Person]
+  partners: [Person]
+  children: [Person]
 }
 
 """Top level GraphQL queryable objects"""
 type Query {
   person(id: ID): Person
   searchPersons(name: String): [Person]
+}
+
+type UpdatePerson {
+  person: Person!
 }
 

@@ -25,6 +25,7 @@ export default createFragmentContainer(Person,
         fragment Person_person on Person {
             id
             name
+            gender
             residence
             birthYear
             deathYear

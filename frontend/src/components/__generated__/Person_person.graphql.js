@@ -8,11 +8,13 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+export type Gender = "FEMALE" | "MALE" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type Person_person$ref: FragmentReference;
 export type Person_person = {|
   +id: string,
   +name: string,
+  +gender: ?Gender,
   +residence: ?string,
   +birthYear: ?number,
   +deathYear: ?number,
@@ -45,6 +47,13 @@ const node/*: ConcreteFragment*/ = {
     {
       "kind": "ScalarField",
       "alias": null,
+      "name": "gender",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
       "name": "residence",
       "args": null,
       "storageKey": null
@@ -66,5 +75,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '1db9f733ee8f6327e10f6c0bde97b162';
+(node/*: any*/).hash = '0eadf5c5195589503324dc2826102d8c';
 module.exports = node;
