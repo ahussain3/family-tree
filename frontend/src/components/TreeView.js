@@ -4,6 +4,7 @@ import {QueryRenderer, graphql} from 'react-relay';
 import environment from '../relay.js';
 import Person from './Person.js';
 import {MarriageLayout} from './MarriageLayout.js'
+import SideBySide from './SideBySide.js';
 
 export class TreeView extends React.Component {
     constructor(props, context) {
@@ -16,11 +17,18 @@ export class TreeView extends React.Component {
     render() {
         const person = this.props.person
         const partner = this.props.partner
+        const children = this.props.children
+
         if (partner) {
-            return <MarriageLayout
-                person={person}
-                partner={partner}
-            ></MarriageLayout>
+            return <>
+                <MarriageLayout
+                    person={person}
+                    partner={partner}
+                ></MarriageLayout>
+                <SideBySide>
+                    {children.map((child, i) => <Person person={child} key={i}/>)}
+                </SideBySide>
+            </>
         }
 
         return <Person
