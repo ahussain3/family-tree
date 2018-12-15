@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 3ba900cb794b03a2f0a6cab627731107
+ * @relayHash a19f89541303ff5b1ffb649f31f1aae1
  */
 
 /* eslint-disable */
@@ -10,31 +10,38 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type Person_person$ref = any;
-export type TreeViewRootQueryVariables = {|
+export type TreeLayoutQueryVariables = {|
   id: string
 |};
-export type TreeViewRootQueryResponse = {|
+export type TreeLayoutQueryResponse = {|
   +person: ?{|
     +partners: ?$ReadOnlyArray<?{|
+      +$fragmentRefs: Person_person$ref
+    |}>,
+    +children: ?$ReadOnlyArray<?{|
       +$fragmentRefs: Person_person$ref
     |}>,
     +$fragmentRefs: Person_person$ref,
   |}
 |};
-export type TreeViewRootQuery = {|
-  variables: TreeViewRootQueryVariables,
-  response: TreeViewRootQueryResponse,
+export type TreeLayoutQuery = {|
+  variables: TreeLayoutQueryVariables,
+  response: TreeLayoutQueryResponse,
 |};
 */
 
 
 /*
-query TreeViewRootQuery(
+query TreeLayoutQuery(
   $id: ID!
 ) {
   person(id: $id) {
     ...Person_person
     partners {
+      ...Person_person
+      id
+    }
+    children {
       ...Person_person
       id
     }
@@ -74,58 +81,69 @@ v2 = {
   "name": "Person_person",
   "args": null
 },
-v3 = {
+v3 = [
+  v2
+],
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
-v4 = {
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "name",
   "args": null,
   "storageKey": null
 },
-v5 = {
+v6 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "gender",
   "args": null,
   "storageKey": null
 },
-v6 = {
+v7 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "residence",
   "args": null,
   "storageKey": null
 },
-v7 = {
+v8 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "birthYear",
   "args": null,
   "storageKey": null
 },
-v8 = {
+v9 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "deathYear",
   "args": null,
   "storageKey": null
-};
+},
+v10 = [
+  v4,
+  v5,
+  v6,
+  v7,
+  v8,
+  v9
+];
 return {
   "kind": "Request",
   "operationKind": "query",
-  "name": "TreeViewRootQuery",
+  "name": "TreeLayoutQuery",
   "id": null,
-  "text": "query TreeViewRootQuery(\n  $id: ID!\n) {\n  person(id: $id) {\n    ...Person_person\n    partners {\n      ...Person_person\n      id\n    }\n    id\n  }\n}\n\nfragment Person_person on Person {\n  id\n  name\n  gender\n  residence\n  birthYear\n  deathYear\n}\n",
+  "text": "query TreeLayoutQuery(\n  $id: ID!\n) {\n  person(id: $id) {\n    ...Person_person\n    partners {\n      ...Person_person\n      id\n    }\n    children {\n      ...Person_person\n      id\n    }\n    id\n  }\n}\n\nfragment Person_person on Person {\n  id\n  name\n  gender\n  residence\n  birthYear\n  deathYear\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "TreeViewRootQuery",
+    "name": "TreeLayoutQuery",
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -148,9 +166,17 @@ return {
             "args": null,
             "concreteType": "Person",
             "plural": true,
-            "selections": [
-              v2
-            ]
+            "selections": v3
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "children",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Person",
+            "plural": true,
+            "selections": v3
           }
         ]
       }
@@ -158,7 +184,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "TreeViewRootQuery",
+    "name": "TreeLayoutQuery",
     "argumentDefinitions": v0,
     "selections": [
       {
@@ -170,12 +196,12 @@ return {
         "concreteType": "Person",
         "plural": false,
         "selections": [
-          v3,
           v4,
           v5,
           v6,
           v7,
           v8,
+          v9,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -184,14 +210,17 @@ return {
             "args": null,
             "concreteType": "Person",
             "plural": true,
-            "selections": [
-              v3,
-              v4,
-              v5,
-              v6,
-              v7,
-              v8
-            ]
+            "selections": v10
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "children",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Person",
+            "plural": true,
+            "selections": v10
           }
         ]
       }
@@ -200,5 +229,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '5053cb385fef78c7dd2c69e9358af2c7';
+(node/*: any*/).hash = '3c3b61f341fbf1a8c0e9c76f8f067b96';
 module.exports = node;

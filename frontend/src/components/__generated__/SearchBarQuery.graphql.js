@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5fda8efe98a70fe1623ef30604351e95
+ * @relayHash 5e620b628c8908420dffa84c0ace6e92
  */
 
 /* eslint-disable */
@@ -16,9 +16,6 @@ export type SearchBarQueryResponse = {|
   +searchPersons: ?$ReadOnlyArray<?{|
     +id: string,
     +name: string,
-    +residence: ?string,
-    +birthYear: ?number,
-    +deathYear: ?number,
   |}>
 |};
 export type SearchBarQuery = {|
@@ -35,9 +32,6 @@ query SearchBarQuery(
   searchPersons(name: $name) {
     id
     name
-    residence
-    birthYear
-    deathYear
   }
 }
 */
@@ -81,27 +75,6 @@ v1 = [
         "name": "name",
         "args": null,
         "storageKey": null
-      },
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "residence",
-        "args": null,
-        "storageKey": null
-      },
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "birthYear",
-        "args": null,
-        "storageKey": null
-      },
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "deathYear",
-        "args": null,
-        "storageKey": null
       }
     ]
   }
@@ -111,7 +84,7 @@ return {
   "operationKind": "query",
   "name": "SearchBarQuery",
   "id": null,
-  "text": "query SearchBarQuery(\n  $name: String!\n) {\n  searchPersons(name: $name) {\n    id\n    name\n    residence\n    birthYear\n    deathYear\n  }\n}\n",
+  "text": "query SearchBarQuery(\n  $name: String!\n) {\n  searchPersons(name: $name) {\n    id\n    name\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -130,5 +103,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'a609bf98d8a0418aea0139ddb197374b';
+(node/*: any*/).hash = '38c53a64265d0b098cd5cc50ca419446';
 module.exports = node;

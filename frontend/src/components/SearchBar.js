@@ -8,9 +8,6 @@ const query = graphql`
         searchPersons(name: $name) {
             id
             name
-            residence
-            birthYear
-            deathYear
         }
     }
 `
@@ -41,7 +38,7 @@ export class SearchBar extends React.Component {
         let isLoading = (error == null && props == null);
 
         return <AsyncTypeahead
-            minLength={3}
+            minLength={1}
             onSearch={(query) => {this.setState({searchText: query})}}
             onChange={(selected) => {this.onSelected(selected)}}
             placeholder="Search for a person..."

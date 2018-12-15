@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import {SearchBar} from './components/SearchBar.js';
 import { Container, Row, Col, FormGroup } from 'reactstrap';
-import { TreeView } from './components/TreeView';
+import { TreeLayout } from './TreeLayout.js';
 
 class App extends Component {
   constructor(props, context) {
@@ -30,7 +30,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <TreeView id={this.state.rootPerson}></TreeView>
+            <TreeLayout id={this.state.rootPerson}></TreeLayout>
           </Col>
         </Row>
       </Container>

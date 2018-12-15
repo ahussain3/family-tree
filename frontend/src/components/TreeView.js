@@ -3,40 +3,35 @@ import {PropTypes} from 'prop-types';
 import {QueryRenderer, graphql} from 'react-relay';
 import environment from '../relay.js';
 import Person from './Person.js';
-import MarriageLayout from './MarriageLayout.js'
-
-const query = graphql`
-    query TreeViewRootQuery($id: ID!) {
-        person(id: $id) {
-            ...Person_person
-            partners {
-                ...Person_person
-            }
-        }
-    }
-`
+import {MarriageLayout} from './MarriageLayout.js'
 
 export class TreeView extends React.Component {
-    innerRender = (readyState) => {
-        let {_, props} = readyState
-        if (props == null || !props.person) { return <div></div> }
-        if (props.person.partners.length == 0) {
-            return <Person person={props.person || null}></Person>
-        }
-        const MarriageLayoutCpt = MarriageLayout(props.person, props.person.partners[0])
-        return <MarriageLayoutCpt />
+    constructor(props, context) {
+        super(props, context)
+    }
+
+    componentWillReceiveProps = (nextProps) => {
     }
 
     render() {
-        return <QueryRenderer
-            environment={environment}
-            render={this.innerRender}
-            query={this.props.id ? query : ''}
-            variables={{id: this.props.id}}
-        />
+        const person = this.props.person
+        const partner = this.props.partner
+        if (partner) {
+            return <MarriageLayout
+                person={person}
+                partner={partner}
+            ></MarriageLayout>
+        }
+
+        return <Person
+            person={this.props.person || null}
+            // showHandleForChildren={showHandleForChildren}
+            // showChildren={this.showChildren}
+            >
+        </Person>
     }
 }
 
 TreeView.propTypes = {
-    id: PropTypes.string
+    person: Person
 };

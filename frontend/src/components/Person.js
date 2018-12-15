@@ -1,7 +1,12 @@
 import React from 'react';
 import {createFragmentContainer, graphql} from 'react-relay';
+import {Button} from 'reactstrap';
 
 class Person extends React.Component {
+    handleClick = () => {
+        this.props.showChildren(this.props.person.id)
+    }
+
     render () {
         if (this.props.person == null) {
             return <div></div>
@@ -16,6 +21,7 @@ class Person extends React.Component {
             <h1>{this.props.person.name}</h1>
             <h2>{this.props.person.residence || ""}</h2>
             <p>{lifespan}</p>
+            {this.props.showHandleForChildren && <Button size="sm" onClick={this.handleClick}>Show Children</Button>}
         </div>
     }
 }
