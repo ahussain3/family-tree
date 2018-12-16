@@ -18,7 +18,11 @@ export class TreeView extends React.Component {
         this.setState({shouldShowChildren: true})
     }
 
-    showHandleForChildren = () => {
+    hideChildren = () => {
+        this.setState({shouldShowChildren: false})
+    }
+
+    hasChildren = () => {
         return this.props.partner != null
     }
 
@@ -29,13 +33,23 @@ export class TreeView extends React.Component {
 
         if (this.state.shouldShowChildren) {
             return <>
-                <Row>
-                    <MarriageLayout
-                        person={person}
-                        partner={partner}
-                    ></MarriageLayout>
+                <Row className={"justify-content-center"}>
+                    <MarriageLayout>
+                        <Person person={person}
+                            hasChildren={this.hasChildren()}
+                            childrenAreVisible={true}
+                            showChildren={this.showChildren}
+                            hideChildren={this.hideChildren}
+                        />
+                        <Person person={partner}
+                            hasChildren={this.hasChildren()}
+                            childrenAreVisible={true}
+                            showChildren={this.showChildren}
+                            hideChildren={this.hideChildren}
+                        />
+                    </MarriageLayout>
                 </Row>
-                <Row>
+                <Row className={"justify-content-center"}>
                     <SideBySide>
                         {children.map((child, i) => <TreeLayout
                             id={child.__id}
@@ -47,8 +61,10 @@ export class TreeView extends React.Component {
 
         return <Person
             person={this.props.person || null}
-            showHandleForChildren={this.showHandleForChildren()}
+            hasChildren={this.hasChildren()}
+            childrenAreVisible={false}
             showChildren={this.showChildren}
+            hideChildren={this.hideChildren}
             >
         </Person>
     }

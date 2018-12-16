@@ -3,8 +3,19 @@ import {createFragmentContainer, graphql} from 'react-relay';
 import {Button} from 'reactstrap';
 
 class Person extends React.Component {
+    constructor(props, context) {
+        super(props, context)
+        this.state = {
+            areChildrenVisible: false
+        }
+    }
+
     handleClick = () => {
-        this.props.showChildren(this.props.person.id)
+        if (this.props.childrenAreVisible) {
+            this.props.hideChildren(this.props.person.id)
+        } else {
+            this.props.showChildren(this.props.person.id)
+        }
     }
 
     render () {
@@ -21,7 +32,8 @@ class Person extends React.Component {
             <h1>{this.props.person.name}</h1>
             <h2>{this.props.person.residence || ""}</h2>
             <p>{lifespan}</p>
-            {this.props.showHandleForChildren && <Button size="sm" onClick={this.handleClick}>Show Children</Button>}
+            {this.props.hasChildren && !this.props.childrenAreVisible && <Button size="sm" color="link" onClick={this.handleClick}>Children</Button>}
+            {this.props.hasChildren && this.props.childrenAreVisible && <Button size="sm" color="link" onClick={this.handleClick}>Hide Children</Button>}
         </div>
     }
 }

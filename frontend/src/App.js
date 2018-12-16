@@ -17,23 +17,16 @@ class App extends Component {
   }
 
   render() {
-    return (
-      <Container>
-        <Row>
-          <Col>
-            <FormGroup>
-              <SearchBar
-                setRootPerson={this.setRootPerson}
-              ></SearchBar>
-            </FormGroup>
-          </Col>
-        </Row>
-        <Row>
-          <Container>
-            <TreeLayout id={this.state.rootPerson}></TreeLayout>
-          </Container>
-        </Row>
-      </Container>
+    return (<>
+        <Container>
+          <FormGroup>
+            <SearchBar
+              setRootPerson={this.setRootPerson}
+            ></SearchBar>
+          </FormGroup>
+        </Container>
+        <TreeLayout id={this.state.rootPerson}></TreeLayout>
+      </>
     );
   }
 }

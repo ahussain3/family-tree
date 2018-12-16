@@ -3,6 +3,8 @@ import {PropTypes} from 'prop-types';
 import {QueryRenderer, graphql} from 'react-relay';
 import environment from './relay.js';
 import {TreeView} from './components/TreeView.js'
+import { Container, Row, Col, FormGroup } from 'reactstrap';
+
 
 // Responsible for going to the server and retrieving in depth information for a particular
 // person from the id of that person alone.
@@ -26,11 +28,13 @@ export class TreeLayout extends React.Component {
         let {_, props} = readyState
         if (props == null || !props.person) { return <div></div> }
         const person = props.person
-        return <TreeView
-            person={person||null}
-            partner={person.partners[0]||null}
-            children={person.children}
-        ></TreeView>
+        return <Container>
+            <TreeView
+                person={person||null}
+                partner={person.partners[0]||null}
+                children={person.children}
+            ></TreeView>
+        </Container>
     }
 
     render() {

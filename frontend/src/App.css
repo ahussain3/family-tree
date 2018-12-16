@@ -31,13 +31,14 @@
   }
 }
 
+/* Person */
 .person {
   border: 2px solid lightblue;
   width: 150px;
   padding: 10px;
   border-radius: 10px;
   text-align: center;
-  margin: 10px;
+  margin: 10px auto;
 }
 
 .person > h1 {
@@ -62,4 +63,13 @@
 .flex-item {
   display: flex;
   justify-content: space-between;
+}
+
+.marriage > .person {
+  margin: 10px;
+}
+
+/* for debugging */
+.container {
+  /* border: 1px solid red; */
 }
