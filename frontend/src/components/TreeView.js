@@ -1,17 +1,25 @@
 import React from 'react';
 import {PropTypes} from 'prop-types';
-import {QueryRenderer, graphql} from 'react-relay';
-import environment from '../relay.js';
 import Person from './Person.js';
 import {MarriageLayout} from './MarriageLayout.js'
 import SideBySide from './SideBySide.js';
+import { TreeLayout } from '../TreeLayout.js';
+import { Container, Row, Col, FormGroup } from 'reactstrap';
 
 export class TreeView extends React.Component {
     constructor(props, context) {
         super(props, context)
+        this.state = {
+            shouldShowChildren: false
+        }
     }
 
-    componentWillReceiveProps = (nextProps) => {
+    showChildren = () => {
+        this.setState({shouldShowChildren: true})
+    }
+
+    showHandleForChildren = () => {
+        return this.props.partner != null
     }
 
     render() {
@@ -19,22 +27,28 @@ export class TreeView extends React.Component {
         const partner = this.props.partner
         const children = this.props.children
 
-        if (partner) {
+        if (this.state.shouldShowChildren) {
             return <>
-                <MarriageLayout
-                    person={person}
-                    partner={partner}
-                ></MarriageLayout>
-                <SideBySide>
-                    {children.map((child, i) => <Person person={child} key={i}/>)}
-                </SideBySide>
+                <Row>
+                    <MarriageLayout
+                        person={person}
+                        partner={partner}
+                    ></MarriageLayout>
+                </Row>
+                <Row>
+                    <SideBySide>
+                        {children.map((child, i) => <TreeLayout
+                            id={child.__id}
+                            key={i}/>)}
+                    </SideBySide>
+                </Row>
             </>
         }
 
         return <Person
             person={this.props.person || null}
-            // showHandleForChildren={showHandleForChildren}
-            // showChildren={this.showChildren}
+            showHandleForChildren={this.showHandleForChildren()}
+            showChildren={this.showChildren}
             >
         </Person>
     }

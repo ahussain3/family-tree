@@ -29,9 +29,9 @@ class App extends Component {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Container>
             <TreeLayout id={this.state.rootPerson}></TreeLayout>
-          </Col>
+          </Container>
         </Row>
       </Container>
     );

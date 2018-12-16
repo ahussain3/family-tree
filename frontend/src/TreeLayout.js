@@ -4,6 +4,8 @@ import {QueryRenderer, graphql} from 'react-relay';
 import environment from './relay.js';
 import {TreeView} from './components/TreeView.js'
 
+// Responsible for going to the server and retrieving in depth information for a particular
+// person from the id of that person alone.
 
 const query = graphql`
     query TreeLayoutQuery($id: ID!) {
@@ -20,18 +22,10 @@ const query = graphql`
 `
 
 export class TreeLayout extends React.Component {
-    showChildren = (id) => {
-        const person = this.people[id]
-    }
-
     innerRender = (readyState) => {
         let {_, props} = readyState
         if (props == null || !props.person) { return <div></div> }
-        var showHandleForChildren = false
         const person = props.person
-        if (person.partners.length !== 0 || person.children.length !== 0 ) {
-            showHandleForChildren = true
-        }
         return <TreeView
             person={person||null}
             partner={person.partners[0]||null}
