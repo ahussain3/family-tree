@@ -42,8 +42,8 @@ export class TreeView extends React.Component {
                             hideChildren={this.hideChildren}
                         />
                         <Person person={partner}
-                            hasChildren={this.hasChildren()}
-                            childrenAreVisible={true}
+                            hasChildren={false} // TODO: Better way to deal with this
+                            childrenAreVisible={false}
                             showChildren={this.showChildren}
                             hideChildren={this.hideChildren}
                         />

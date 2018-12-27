@@ -7308,6 +7308,10 @@ react-overlays@^0.8.0, react-overlays@^0.8.1:
     react-transition-group "^2.2.0"
     warning "^3.0.0"
 
+react-pan-and-zoom-hoc@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/react-pan-and-zoom-hoc/-/react-pan-and-zoom-hoc-1.3.2.tgz#15d8ee10535930c4ca904ce1e2169af993c6bcb1"
+
 react-popper@^0.10.4:
   version "0.10.4"
   resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.10.4.tgz#af2a415ea22291edd504678d7afda8a6ee3295aa"
