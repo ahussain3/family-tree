@@ -77,6 +77,12 @@
   margin: 10px;
 }
 
+.container .form-group {
+  width: 100%;
+  margin-bottom: 0px;
+  margin-right: 10px;
+}
+
 /* for debugging */
 .container {
   border: 1px solid red;

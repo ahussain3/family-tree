@@ -1,19 +1,22 @@
 import React, { Component } from 'react';
 import './App.css';
 import {SearchBar} from './components/SearchBar.js';
-import { Container, Row, Col, FormGroup } from 'reactstrap';
+import { Container, Row, Col, FormGroup, Button, Navbar, NavItem, Nav } from 'reactstrap';
 import { TreeLayout } from './TreeLayout.js';
 import panAndZoomHoc from 'react-pan-and-zoom-hoc';
 
 const InteractiveDiv = panAndZoomHoc('div');
+
+const X_START = 0.5
+const Y_START = 0.9
 
 class App extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
       rootPerson: '',
-      x: 0.5,
-      y: 0.5,
+      x: X_START,
+      y: Y_START,
       scale: 1
     };
   }
@@ -23,13 +26,17 @@ class App extends Component {
   }
 
   handlePanAndZoom = (x, y, scale) => {
-      console.log("Pan: " + x + ", " + y + ", Scale: " + scale)
-      this.setState({x, y, scale});
+    console.log("Pan: " + x + ", " + y + ", Scale: " + scale)
+    this.setState({x, y, scale});
   }
 
   handlePanMove = (x, y) => {
-      console.log("Pan: " + x + ", " + y)
-      this.setState({x, y});
+    console.log("Pan: " + x + ", " + y)
+    this.setState({x, y});
+  }
+
+  resetPan = () => {
+    this.setState({x: X_START, y: Y_START})
   }
 
   render() {
@@ -37,11 +44,18 @@ class App extends Component {
 
     return (<>
         <Container>
-          <FormGroup>
-            <SearchBar
-              setRootPerson={this.setRootPerson}
-            ></SearchBar>
-          </FormGroup>
+          <Navbar color="white" light expand="md">
+            <FormGroup>
+              <SearchBar
+                setRootPerson={this.setRootPerson}
+              ></SearchBar>
+            </FormGroup>
+            <Nav className="ml-auto" navbar>
+              <NavItem>
+                <Button onClick={this.resetPan}>Reset</Button>
+              </NavItem>
+            </Nav>
+          </Navbar>
         </Container>
         <InteractiveDiv
             x={x}
