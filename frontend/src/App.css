@@ -34,11 +34,11 @@
 /* Person */
 .person {
   border: 2px solid lightblue;
-  width: 150px;
-  padding: 10px;
+  width: 140px;
+  padding: 20px;
   border-radius: 10px;
   text-align: center;
-  margin: 10px auto;
+  margin: 10px;
 }
 
 .person > h1 {
@@ -59,7 +59,8 @@
   position: relative;
   cursor: move;
   width: 100%;
-  height: 500px;
+  height: 600px;
+  overflow: hidden;
   border: 1px solid black;
 }
 
@@ -85,5 +86,5 @@
 
 /* for debugging */
 .container {
-  border: 1px solid red;
+  /* border: 1px solid red; */
 }

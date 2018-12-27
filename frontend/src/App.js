@@ -7,8 +7,8 @@ import panAndZoomHoc from 'react-pan-and-zoom-hoc';
 
 const InteractiveDiv = panAndZoomHoc('div');
 
-const X_START = 0.5
-const Y_START = 0.9
+const X_START = 0.4
+const Y_START = 0.6
 
 class App extends Component {
   constructor(props, context) {
@@ -68,7 +68,7 @@ class App extends Component {
             onPanAndZoom={(x, y, scale) => this.handlePanAndZoom(x, y, scale)}
             onPanMove={(x, y) => this.handlePanMove(x, y)}
         >
-          <div style={{position: 'absolute', bottom: `${y * 100}%`, right: `${x * 100}%`, width: 1, height: 1, backgroundColor: 'black'}}>
+          <div style={{position: 'absolute', bottom: `${y * 100}%`, right: `${x * 100}%`, width: 200, height: 200}}>
             <TreeLayout id={this.state.rootPerson}></TreeLayout>
           </div>
         </InteractiveDiv>

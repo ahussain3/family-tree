@@ -59,14 +59,16 @@ export class TreeView extends React.Component {
             </>
         }
 
-        return <Person
-            person={this.props.person || null}
-            hasChildren={this.hasChildren()}
-            childrenAreVisible={false}
-            showChildren={this.showChildren}
-            hideChildren={this.hideChildren}
-            >
-        </Person>
+        return <Row className={"justify-content-center"}>
+            <Person
+                person={this.props.person || null}
+                hasChildren={this.hasChildren()}
+                childrenAreVisible={false}
+                showChildren={this.showChildren}
+                hideChildren={this.hideChildren}
+                >
+            </Person>
+        </Row>
     }
 }
 
