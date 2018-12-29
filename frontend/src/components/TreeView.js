@@ -10,7 +10,8 @@ export class TreeView extends React.Component {
     constructor(props, context) {
         super(props, context)
         this.state = {
-            shouldShowChildren: false
+            shouldShowChildren: false,
+            shouldShowParents: false
         }
     }
 
@@ -26,10 +27,27 @@ export class TreeView extends React.Component {
         return this.props.partner != null
     }
 
+    hasParents = () => {
+        return this.props.parents == null || this.props.parents.length > 0
+    }
+
+    showParents = () => {
+        this.setState({shouldShowParents: true})
+    }
+
+    hideParents = () => {
+        this.setState({shouldShowParents: false})
+    }
+
     render() {
         const person = this.props.person
         const partner = this.props.partner
         const children = this.props.children
+        const parents = this.props.parents
+
+        if (this.state.shouldShowParents) {
+            return <TreeLayout id={parents[0].__id}></TreeLayout>
+        }
 
         if (this.state.shouldShowChildren) {
             return <>
@@ -40,12 +58,16 @@ export class TreeView extends React.Component {
                             childrenAreVisible={true}
                             showChildren={this.showChildren}
                             hideChildren={this.hideChildren}
+                            hasParents={this.hasParents()}
+                            parentsAreVisible={false}
                         />
                         <Person person={partner}
                             hasChildren={false} // TODO: Better way to deal with this
                             childrenAreVisible={false}
                             showChildren={this.showChildren}
                             hideChildren={this.hideChildren}
+                            hasParents={this.hasParents()}
+                            parentsAreVisible={false}
                         />
                     </MarriageLayout>
                 </Row>
@@ -66,6 +88,10 @@ export class TreeView extends React.Component {
                 childrenAreVisible={false}
                 showChildren={this.showChildren}
                 hideChildren={this.hideChildren}
+                hasParents={this.hasParents()}
+                parentsAreVisible={false}
+                showParents={this.showParents}
+                hideParents={this.hideParents}
                 >
             </Person>
         </Row>

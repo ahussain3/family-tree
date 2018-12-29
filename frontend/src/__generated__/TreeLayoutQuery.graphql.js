@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a19f89541303ff5b1ffb649f31f1aae1
+ * @relayHash c12aaf3677b1a9d8be4cfde2f29b75b8
  */
 
 /* eslint-disable */
@@ -19,6 +19,9 @@ export type TreeLayoutQueryResponse = {|
       +$fragmentRefs: Person_person$ref
     |}>,
     +children: ?$ReadOnlyArray<?{|
+      +$fragmentRefs: Person_person$ref
+    |}>,
+    +parents: ?$ReadOnlyArray<?{|
       +$fragmentRefs: Person_person$ref
     |}>,
     +$fragmentRefs: Person_person$ref,
@@ -42,6 +45,10 @@ query TreeLayoutQuery(
       id
     }
     children {
+      ...Person_person
+      id
+    }
+    parents {
       ...Person_person
       id
     }
@@ -139,7 +146,7 @@ return {
   "operationKind": "query",
   "name": "TreeLayoutQuery",
   "id": null,
-  "text": "query TreeLayoutQuery(\n  $id: ID!\n) {\n  person(id: $id) {\n    ...Person_person\n    partners {\n      ...Person_person\n      id\n    }\n    children {\n      ...Person_person\n      id\n    }\n    id\n  }\n}\n\nfragment Person_person on Person {\n  id\n  name\n  gender\n  residence\n  birthYear\n  deathYear\n}\n",
+  "text": "query TreeLayoutQuery(\n  $id: ID!\n) {\n  person(id: $id) {\n    ...Person_person\n    partners {\n      ...Person_person\n      id\n    }\n    children {\n      ...Person_person\n      id\n    }\n    parents {\n      ...Person_person\n      id\n    }\n    id\n  }\n}\n\nfragment Person_person on Person {\n  id\n  name\n  gender\n  residence\n  birthYear\n  deathYear\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -172,6 +179,16 @@ return {
             "kind": "LinkedField",
             "alias": null,
             "name": "children",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Person",
+            "plural": true,
+            "selections": v3
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "parents",
             "storageKey": null,
             "args": null,
             "concreteType": "Person",
@@ -221,6 +238,16 @@ return {
             "concreteType": "Person",
             "plural": true,
             "selections": v10
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "parents",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Person",
+            "plural": true,
+            "selections": v10
           }
         ]
       }
@@ -229,5 +256,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3c3b61f341fbf1a8c0e9c76f8f067b96';
+(node/*: any*/).hash = '7dcb1084d89d6f3ad2bbb40768330277';
 module.exports = node;

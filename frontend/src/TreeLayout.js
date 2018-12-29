@@ -19,6 +19,9 @@ const query = graphql`
             children {
                 ...Person_person
             }
+            parents {
+                ...Person_person
+            }
         }
     }
 `
@@ -33,6 +36,7 @@ export class TreeLayout extends React.Component {
                 person={person||null}
                 partner={person.partners[0]||null}
                 children={person.children}
+                parents={person.parents}
             ></TreeView>
         </Container>
     }
