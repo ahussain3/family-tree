@@ -29,7 +29,7 @@ class Person extends React.Component {
             lifespan = this.props.person.birthYear + "-" + (this.props.person.deathYear || "")
         }
 
-        return <div className="person">
+        return <div className={"person " + this.props.className} >
             <h1>{this.props.person.name}</h1>
             <h2>{this.props.person.residence || ""}</h2>
             <p>{lifespan}</p>

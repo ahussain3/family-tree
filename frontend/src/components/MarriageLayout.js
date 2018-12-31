@@ -1,6 +1,4 @@
 import React from 'react';
-import Person from './Person.js'
-import SideBySide from './SideBySide.js'
 
 export class MarriageLayout extends React.Component {
     // Frustrating that I can't inspect the data here for personA and personB

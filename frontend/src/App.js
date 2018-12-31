@@ -4,6 +4,7 @@ import {SearchBar} from './components/SearchBar.js';
 import { Container, Row, Col, FormGroup, Button, Navbar, NavItem, Nav } from 'reactstrap';
 import { TreeLayout } from './TreeLayout.js';
 import panAndZoomHoc from 'react-pan-and-zoom-hoc';
+import {SteppedLineTo, DrawLinesTo} from './components/Line.js';
 
 const InteractiveDiv = panAndZoomHoc('div');
 
@@ -41,6 +42,12 @@ class App extends Component {
 
   render() {
     const {x, y, scale} = this.state;
+    const style = {
+      delay: true,
+      borderColor: 'black',
+      borderStyle: 'solid',
+      borderWidth: 3,
+    };
 
     return (<>
         <Container>
@@ -57,6 +64,20 @@ class App extends Component {
             </Nav>
           </Navbar>
         </Container>
+        <Container>
+          <div id="container" className="flex-container" style={{width:500}}>
+            <div id="a" style={{width:100, height: 100, border: "1px solid black", margin: 20}}>Father</div>
+            <div id="b" style={{width:100, height: 100, border: "1px solid black", margin: 20}}>Mother</div>
+          </div>
+          <div id="container" className="flex-container" style={{width:500}}>
+            <div id="c1" style={{width:100, height: 100, border: "1px solid black", margin: 20}}>Child</div>
+            <div id="c2" style={{width:100, height: 100, border: "1px solid black", margin: 20}}>Child</div>
+            <div id="c3" style={{width:100, height: 100, border: "1px solid black", margin: 20}}>Child</div>
+          </div>
+          {/* <SteppedLineTo from="a" to="b" orientation="h" fromAnchor="right" toAnchor="left" {...style}/> */}
+          <DrawLinesTo parent_a="a" parent_b="b" children={["c1", "c2", "c3"]} {...style}></DrawLinesTo>
+        </Container>
+
         <InteractiveDiv
             x={x}
             y={y}

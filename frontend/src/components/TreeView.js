@@ -4,7 +4,7 @@ import Person from './Person.js';
 import {MarriageLayout} from './MarriageLayout.js'
 import SideBySide from './SideBySide.js';
 import { TreeLayout } from '../TreeLayout.js';
-import { Container, Row, Col, FormGroup } from 'reactstrap';
+import { Row } from 'reactstrap';
 
 export class TreeView extends React.Component {
     constructor(props, context) {
@@ -54,6 +54,7 @@ export class TreeView extends React.Component {
                 <Row className={"justify-content-center"}>
                     <MarriageLayout>
                         <Person person={person}
+                            className={"dad"}
                             hasChildren={this.hasChildren()}
                             childrenAreVisible={true}
                             showChildren={this.showChildren}
@@ -62,6 +63,7 @@ export class TreeView extends React.Component {
                             parentsAreVisible={false}
                         />
                         <Person person={partner}
+                            className={"mom"}
                             hasChildren={false} // TODO: Better way to deal with this
                             childrenAreVisible={false}
                             showChildren={this.showChildren}
@@ -84,6 +86,7 @@ export class TreeView extends React.Component {
         return <Row className={"justify-content-center"}>
             <Person
                 person={this.props.person || null}
+                className={"child"}
                 hasChildren={this.hasChildren()}
                 childrenAreVisible={false}
                 showChildren={this.showChildren}
