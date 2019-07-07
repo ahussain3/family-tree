@@ -1,0 +1,53 @@
+html {
+    box-sizing: border-box;
+  }
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+div#container {
+    position: relative;
+    height: 700px;
+    border: 1px solid blue;
+    cursor: all-scroll;
+    overflow: hidden;
+}
+
+div#canvas {
+    position: relative;
+    height: 700px;
+    /*border: 1px solid red;*/
+}
+
+div.person {
+    position: absolute;
+    width: 100px;
+    height: 200px;
+    text-align: center;
+    border: 1px solid red;
+    cursor: default;
+}
+
+div.person.focused {
+    border: 4px solid green;
+}
+
+div.marriage {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+}
+
+div.line {
+    position: absolute;
+    border: 0.5px solid gray;
+}
+
+div.person p {
+    font-size: 10pt;
+    line-height: 11pt;
+}
