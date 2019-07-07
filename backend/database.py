@@ -9,11 +9,10 @@ graph = Graph("bolt://localhost:7687", auth=('neo4j', 'banana01'))
 # Node Types
 class NodeType(Enum):
     PERSON = "Person"
-    MARRIAGE = "Marriage"
 
 class RelationshipType(Enum):
-    PARTNER = "PARTNER"  # should go from 'Marriage' node to 'Person' node
-    CHILD = "CHILD"  # should go from 'Marriage' to 'Person' node
+    PARTNER = "PARTNER"
+    CHILD = "CHILD"
     PARENT = "PARENT"
 
 # To do(Awais): Constraints
@@ -32,8 +31,6 @@ def make_opaque_id(prefix):
 def get_node(opaque_id):
     if opaque_id[:2] == "P_":
         node_type = NodeType.PERSON.value
-    elif opaque_id[:2] == "M_":
-        node_type = NodeType.MARRIAGE.value
     else:
         raise ValueError(f"I don't understand the id: {opaque_id}")
 
@@ -88,6 +85,10 @@ def add_marriage(person_a, person_b, *, start_year, end_year):
     graph.create(rel_b)
 
     return (person_a, person_b)
+
+def update_marriage(person_a, person_b):
+    # TODO(Awais)
+    pass
 
 def add_child(parent, child):
     rel_a = Relationship(parent, RelationshipType.CHILD.value, child)

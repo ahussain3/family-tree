@@ -21,6 +21,13 @@ def neo_to_gql(cls, object):
     fields['id'] = object.get('opaque_id', str(random.randint(0,5000)))
     return cls(**fields)
 
+def mk_person(object):
+    return neo_to_gql(Person, object)
+
+def mk_marriage(partner_a, partner_b):
+    partners = sorted([partner_a, partner_b], key=lambda p: p.id)
+    return Marriage(id=f"{partners[0].id}+{partners[1].id}")
+
 # Object Types
 class Person(gql.ObjectType):
     """A person in the family tree"""
@@ -31,8 +38,14 @@ class Person(gql.ObjectType):
     residence = gql.String()
     birth_year = gql.Int()
     death_year = gql.Int()
-    parents = gql.List(lambda: Person)
-    # siblings = gql.List(lambda: Person)
+    parents = gql.Field(lambda: Marriage, required=False)
+    marriages = gql.List(lambda: Marriage)
+
+class Marriage(gql.ObjectType):
+    """A marriage between two people"""
+    id = gql.ID(required=True)
+    start_year = gql.Int()
+    end_year = gql.Int()
     partners = gql.List(lambda: Person)
     children = gql.List(lambda: Person)
 
@@ -63,7 +76,6 @@ class UpdatePerson(gql.Mutation):
     def mutate(self, info, **user_args):
         return mutate_update_person(info, **user_args)
 
-
 class AddMarriage(gql.Mutation):
     class Arguments:
         partner_a_id = gql.ID(required=True)
@@ -71,21 +83,20 @@ class AddMarriage(gql.Mutation):
         start_year = gql.Int()
         end_year = gql.Int()
 
-    partner_a = gql.Field(Person, required=True)
-    partner_b = gql.Field(Person, required=True)
+    marriage = gql.Field(Marriage, required=True)
 
     def mutate(self, info, **user_args):
         return mutate_add_marriage(info, **user_args)
 
-class AddChild(gql.Mutation):
+class AddChildren(gql.Mutation):
     class Arguments:
         parent_ids = gql.List(gql.ID, required=True)
         child_id = gql.ID(required=True)
 
-    child = gql.Field(Person, required=True)
+    children = gql.Field(gql.List(Person), required=True)
 
     def mutate(self, info, **user_args):
-        return mutate_add_child(info, **user_args)
+        return mutate_add_children(info, **user_args)
 
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
@@ -96,36 +107,52 @@ class Mutation(gql.ObjectType):
     add_person = AddPerson.Field(required=True)
     update_person = UpdatePerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
-    add_child = AddChild.Field(required=True)
-
-
+    add_child = AddChildren.Field(required=True)
 
 
 # Resolvers
 @resolver_for(Query, "person")
 def query_person(self, info, *, id):
     person = database.get_node(id)
-    return neo_to_gql(Person, person)
+    return mk_person(person)
 
 @resolver_for(Query, "search_persons")
 def query_search_persons(self, info, *, name):
     persons = database.search_persons(name)
-    return [neo_to_gql(Person, person) for person in persons]
+    return [mk_person(person) for person in persons]
 
 @resolver_for(Person, "parents")
 def person_parents(self, info):
-    result = database.get_parents(self.id)
-    return [neo_to_gql(Person, person) for person in result]
+    parents = database.get_parents(self.id)
+    if not parents:
+        return None
 
-@resolver_for(Person, "children")
-def person_children(self, info):
-    result = database.get_children(self.id)
-    return [neo_to_gql(Person, person) for person in result]
+    return mk_marriage(
+        partner_a=mk_person(parents[0]),
+        partner_b=mk_person(parents[1]),
+    )
 
-@resolver_for(Person, "partners")
-def person_partners(self, info):
-    result = database.get_partners(self.id)
-    return [neo_to_gql(Person, person) for person in result]
+@resolver_for(Person, "marriages")
+def person_marriages(self, info):
+    partners = database.get_partners(self.id)
+    return [mk_marriage(self, mk_person(partner)) for partner in partners]
+
+@resolver_for(Marriage, "partners")
+def marriage_partners(self, info):
+    partner_ids = self.id.split("+")
+    partners = [database.get_node(partner_id) for partner_id in partner_ids]
+    return [mk_person(partner) for partner in partners]
+
+@resolver_for(Marriage, "children")
+def marriage_children(self, info):
+    (partner_a, partner_b) = self.id.split("+")
+    children_a = [mk_person(child) for child in database.get_children(partner_a)]
+    children_b = [mk_person(child) for child in database.get_children(partner_b)]
+
+    # find the intersection of the two lists
+    children_b_ids = set(child.id for child in children_b)
+    children = [child for child in children_a if child.id in children_b_ids]
+    return sorted(children, key=lambda child: child.birth_year)
 
 # Mutators
 def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, death_year=None):
@@ -136,13 +163,13 @@ def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, de
         birth_year=birth_year,
         death_year=death_year,
     )
-    return AddPerson(person=neo_to_gql(Person, result))
+    return AddPerson(person=mk_person(result))
 
 def mutate_update_person(info, *, id, name=None, gender=None, residence=None, birth_year=None, death_year=None):
     args = locals().copy()
     args.pop("info", None)
     person = database.update_person(**args)
-    return UpdatePerson(person=neo_to_gql(Person, person))
+    return UpdatePerson(person=mk_person(person))
 
 def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, end_year=None):
     partner_a = database.get_node(partner_a_id)
@@ -154,24 +181,25 @@ def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, en
         start_year=start_year,
         end_year=end_year,
     )
-    partner_a, partner_b = (neo_to_gql(Person, person) for person in result)
+    partner_a, partner_b = (mk_person(person) for person in result)
 
-    return AddMarriage(partner_a=partner_a, partner_b=partner_b)
+    return AddMarriage(marriage=mk_marriage(partner_a, partner_b))
 
-def mutate_add_child(info, *, parent_ids, child_id):
-    child = database.get_node(child_id)
+def mutate_add_children(info, *, marriage_id, children_ids):
+    children = [database.get_node(child_id) for child_id in children_ids]
+    parent_ids = marriage_id.split("+")
 
     for parent_id in parent_ids:
         assert child_id != parent_id, "A person cannot be their own child"
 
         parent = database.get_node(parent_id)
+        for child in children:
+            database.add_child(
+                parent=parent,
+                child=child
+            )
 
-        database.add_child(
-            parent=parent,
-            child=child
-        )
-
-    return AddChild(child=neo_to_gql(Person, child))
+    return AddChildren(children=[mk_person(child) for child in children])
 
 schema = gql.Schema(query=Query, mutation=Mutation)
 
