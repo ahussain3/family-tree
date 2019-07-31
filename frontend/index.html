@@ -1,6 +1,8 @@
 <html>
     <head>
         <link rel="stylesheet" href="./style.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="./js/typeahead.js"></script>
         <script src="./js/underscore.js"></script>
         <script src="./js/graphql.js"></script>
         <script src="./js/pan.js"></script>
@@ -12,11 +14,18 @@
         <script src="./app.js"></script>
  -->    </head>
     <body>
-        <button id="tick-btn">Random Person!</button>
+        <!-- <div id="topbar-search">
+            <input class="typeahead" type="text" placeholder="Find a person">
+        </div> -->
+    <div class="bs-example">
+        <h2>Type your favorite car name</h2>
+        <input type="text" class="typeahead tt-query" autocomplete="off" spellcheck="false">
+    </div>
+<!--         <button id="tick-btn">Random Person!</button>
         <button id="focus-btn">Change Focus</button>
         <button id="reset-btn">Reset</button>
         <div id="container">
             <div id="canvas"></div>
         </div>
-    </body>
+ -->    </body>
 </html>
