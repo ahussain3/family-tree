@@ -192,10 +192,6 @@ class Renderer {
         }
     }
 
-    propagateMod(rank) {
-
-    }
-
     normalizeFiles() {
         let min = _.min(this.g.nodes.map(node => node.file).concat([0]))
         this.g.nodes.forEach(node => {

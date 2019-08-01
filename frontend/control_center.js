@@ -8,7 +8,8 @@ class ControlCenter {
         this.visible = visible
     }
 
-    update(visible) {
+    update(data, visible) {
+        this.data = data
         this.visible = visible
     }
 
@@ -30,6 +31,14 @@ class ControlCenter {
 
     hasHiddenChildren = (id) => {
         return this.getHiddenChildren(id).length > 0
+    }
+
+    _fetchPerson = async (id) => {
+        if (!Object.keys(this.data).includes(id)) {
+            await fetchPerson(id)
+            return this.data[id]
+        }
+        return this.data[id]
     }
 
     getHiddenParents = (id) => {
@@ -71,5 +80,37 @@ class ControlCenter {
         }))
 
         return _.difference(children, Array.from(this.visible))
+    }
+
+    fetchHiddenParents = async (id) => {
+        let persons = this.getHiddenParents(id)
+        return Promise.all(persons.map(async (personId) => {
+            await this._fetchPerson(personId)
+            return persons
+        }))
+    }
+
+    fetchHiddenPartners = async (id) => {
+        let persons = this.getHiddenPartners(id)
+        return Promise.all(persons.map(async (personId) => {
+            await this._fetchPerson(personId)
+            return persons
+        }))
+    }
+
+    fetchHiddenSiblings = async (id) => {
+        let persons = this.getHiddenSiblings(id)
+        return Promise.all(persons.map(async (personId) => {
+            await this._fetchPerson(personId)
+            return persons
+        }))
+    }
+
+    fetchHiddenChildren = async (id) => {
+        let persons = this.getHiddenChildren(id)
+        return Promise.all(persons.map(async (personId) => {
+            await this._fetchPerson(personId)
+            return persons
+        }))
     }
 }

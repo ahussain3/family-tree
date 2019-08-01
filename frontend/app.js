@@ -51,8 +51,9 @@ window.onload = function() {
     let createShowLink = function(id, name, func) {
         let p = document.createElement("p")
         let link = createLink(id, name)
-        link.onclick = () => {
-            func(id).forEach(id => addPerson(id))
+        link.onclick = async () => {
+            let result = await func(id)
+            result.forEach(id => addPerson(id))
             render()
         }
         p.append(link)
@@ -78,19 +79,19 @@ window.onload = function() {
         container.innerHTML = "<h3>" + person.name + "</h3>"
 
         if (cc.hasHiddenParents(id)) {
-            container.append(createShowLink(id, "Parents", cc.getHiddenParents))
+            container.append(createShowLink(id, "Parents", cc.fetchHiddenParents))
         }
 
         if (cc.hasHiddenPartners(id)) {
-            container.append(createShowLink(id, "Partners", cc.getHiddenPartners))
+            container.append(createShowLink(id, "Partners", cc.fetchHiddenPartners))
         }
 
         if (cc.hasHiddenSiblings(id)) {
-            container.append(createShowLink(id, "Siblings", cc.getHiddenSiblings))
+            container.append(createShowLink(id, "Siblings", cc.fetchHiddenSiblings))
         }
 
         if (cc.hasHiddenChildren(id)) {
-            container.append(createShowLink(id, "Children", cc.getHiddenChildren))
+            container.append(createShowLink(id, "Children", cc.fetchHiddenChildren))
         }
 
         container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
@@ -185,8 +186,10 @@ window.onload = function() {
     }
 
     let render = function() {
+        console.log("APP")
         console.log(visible)
-        cc.update(visible)
+        console.log(data)
+        cc.update(data, visible)
 
         let x = null
         let y = null

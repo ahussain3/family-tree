@@ -67,9 +67,9 @@ let addMarriageToDataset = function(marriage) {
   data[marriage.id] = clone
 }
 
-let fetchPerson = function (id, cb) {
+let fetchPerson = async function (id, cb) {
   let variables = {"id": id}
-  graph(personQuery)(variables).then(function (response) {
+  return graph(personQuery)(variables).then((response) => {
     let result = response["person"]
     addPersonToDataset(result)
     result.marriages.forEach(marriage => addMarriageToDataset(marriage))
