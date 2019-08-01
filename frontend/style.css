@@ -12,7 +12,7 @@ body {
 }
 
 /* SEARCH INPUT BAR */
-.bs-example {
+#search-bar {
     font-family: sans-serif;
     position: relative;
     margin: 100px;

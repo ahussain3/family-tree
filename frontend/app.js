@@ -2,13 +2,14 @@ window.onload = function() {
     let pw = 100
     let ph = 200
 
-    Object.prototype.keys = function() { return Object.keys(this) }
-    Object.prototype.values = function() { return Object.values(this) }
-    Object.prototype.items = function() { return _.zip(Object.keys(this), Object.values(this)) }
+    // Object.prototype.keys = function() { return Object.keys(this) }
+    // Object.prototype.values = function() { return Object.values(this) }
+    // Object.prototype.items = function() { return _.zip(Object.keys(this), Object.values(this)) }
 
     var xhttp = new XMLHttpRequest();
-    var people = data.values().filter(item => item._type == 'Person').map(item => item.id)
-    var visible = new Set(["awais"])
+    // var data = {}  // keyed by id.
+    var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
+    var visible = new Set([])
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -227,6 +228,10 @@ window.onload = function() {
 
         while (queue.length > 0) {
             let person = data[queue.shift()]
+            if (person == undefined) {
+                continue
+            }
+
             if (visible.has(person.id)) {
                 found = person.id
                 // break as soon as we find another node that is already visible
@@ -301,6 +306,27 @@ window.onload = function() {
         addPerson(id)
         render()
     }
+
+    $('#search-bar input.typeahead').typeahead({
+        hint: true,
+        highlight: true, /* Enable substring highlighting */
+        minLength: 1 /* Specify minimum characters required for showing result */
+    },
+    {
+        name: 'searchPersons',
+        source: searchPersons,
+        display: "name",
+    });
+
+    let selectPerson = function(event, person) {
+      fetchPerson(person.id, (result) => {
+        addPerson(result.id)
+        render()
+      })
+    }
+
+    $('#search-bar input.typeahead.tt-input').bind('typeahead:select', selectPerson);
+
 
     document.querySelector("#tick-btn").addEventListener("click", handleClick)
     document.querySelector("#focus-btn").addEventListener("click", changeFocus)

@@ -5,23 +5,79 @@ var graph = graphql(url, {
   fragments: {}
 })
 
-let searchPersonsQuery = `query searchPersons($name: String) {
+let searchPersonsQuery = `query searchPersonsQuery($name: String) {
   searchPersons(name: $name)  {
     id
     name
   }
 }`
 
-graph(query)().then(function (response) {
-  // response is originally response.data of query result
-  console.log(response)
-}).catch(function (error) {
-  // response is originally response.errors of query result
-  console.log(error)
-})
+let searchPersons = function(query, sync, async) {
+  let variables = {"name": query}
+  graph(searchPersonsQuery)(variables).then(function (response) {
+    let result = response["searchPersons"]
+    async(result)
+  }).catch(function (error) {
+    console.log(error)
+  })
+}
 
+let personQuery = `query personQuery($id: ID) {
+  person(id: $id) {
+    __typename
+    id
+    name
+    gender
+    photoUrl
+    residence
+    birthYear
+    deathYear
+    parents {
+      __typename
+      id
+      startYear
+      endYear
+      partners { id }
+      children { id }
+    }
+    marriages {
+      __typename
+      id
+      startYear
+      endYear
+      partners { id }
+      children { id }
+    }
+  }
+}`
 
+var data = {}
 
-let searchForPerson = function(name) {
+let addPersonToDataset = function(person) {
+  var clone = Object.assign({}, person)
+  clone.marriages = person.marriages.map(marriage => marriage.id)
+  clone.parents = person.parents != null ? person.parents.id : null
+  data[person.id] = clone
+}
 
+let addMarriageToDataset = function(marriage) {
+  var clone = Object.assign({}, marriage)
+  clone.children = marriage.children.map(child => child.id)
+  clone.partners = marriage.partners.map(partner => partner.id)
+  data[marriage.id] = clone
+}
+
+let fetchPerson = function (id, cb) {
+  let variables = {"id": id}
+  graph(personQuery)(variables).then(function (response) {
+    let result = response["person"]
+    addPersonToDataset(result)
+    result.marriages.forEach(marriage => addMarriageToDataset(marriage))
+    if (result.parents) {
+      addMarriageToDataset(result.parents)
+    }
+    cb(result)
+  }).catch(function (error) {
+    console.log(error)
+  })
 }
