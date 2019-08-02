@@ -53,8 +53,10 @@ window.onload = function() {
         let link = createLink(id, name)
         link.onclick = async () => {
             let result = await func(id)
-            result.forEach(id => addPerson(id))
-            render()
+            await result.reduce(
+                (p, id) => p.then(() => addPerson(id)),
+                Promise.resolve(null)
+            );
         }
         p.append(link)
         return p
@@ -221,19 +223,21 @@ window.onload = function() {
     // Returns: list of ids of all nodes that are on a shortest path, including
     // the already visible node, but not including the source node.
     // TODO(Awais) This function probably shouldn't live in this file
-    let shortestPath = function(source, visible) {
+    let shortestPath = async function(source, visible) {
         marked = {}
         queue = [source]
         edgeTo = {}
         found = null
 
+        if (visible.size == 0) {
+            return []
+        }
+
         marked[source] = true
 
         while (queue.length > 0) {
-            let person = data[queue.shift()]
-            if (person == undefined) {
-                continue
-            }
+            let id = queue.shift()
+            let person = await cc._fetchPerson(id)
 
             if (visible.has(person.id)) {
                 found = person.id
@@ -273,11 +277,15 @@ window.onload = function() {
     }
 
     // INTERACTION
-    let addPerson = function(id) {
+    let addPerson = async function(id) {
         // calculate shortest path from this person to another node that is already visible
-        shortestPath(id, visible).concat(id).forEach(item => {
-            visible.add(item)
+        await shortestPath(id, visible).then(result => {
+            result.concat(id).forEach(item => {
+                visible.add(item)
+                render()
+            })
         })
+
     }
 
     let hidePerson = function(id) {
@@ -307,7 +315,6 @@ window.onload = function() {
         if (id == null) { return }
 
         addPerson(id)
-        render()
     }
 
     $('#search-bar input.typeahead').typeahead({
@@ -324,7 +331,6 @@ window.onload = function() {
     let selectPerson = function(event, person) {
       fetchPerson(person.id, (result) => {
         addPerson(result.id)
-        render()
       })
     }
 
