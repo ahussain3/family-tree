@@ -2,6 +2,13 @@
 // who else could be on screen. You can ask it questions like "Does this person
 // have any siblings who are not currently on screen"
 
+const RelativeType = {
+    PARENTS: "PARENTS",
+    PARTNERS: "PARTNERS",
+    SIBLINGS: "SIBLINGS",
+    CHILDREN: "CHILDREN"
+}
+
 class ControlCenter {
     constructor(data, visible) {
         this.data = data
@@ -17,23 +24,34 @@ class ControlCenter {
         return this.visible.has(id)
     }
 
-    hasHiddenParents = (id) => {
-        return this.getHiddenParents(id).length > 0
+    hasHiddenRelatives = (id, type) => {
+        return this.getHiddenRelatives(id, type).length > 0
     }
 
-    hasHiddenPartners = (id) => {
-        return this.getHiddenPartners(id).length > 0
+    getHiddenRelatives = (id, type) => {
+        switch(type) {
+            case RelativeType.PARENTS:
+                return this._getHiddenParents(id)
+            case RelativeType.PARTNERS:
+                return this._getHiddenPartners(id)
+            case RelativeType.SIBLINGS:
+                return this._getHiddenSiblings(id)
+            case RelativeType.CHILDREN:
+                return this._getHiddenChildren(id)
+        }
     }
 
-    hasHiddenSiblings = (id) => {
-        return this.getHiddenSiblings(id).length > 0
+    fetchHiddenRelatives = (type) => {
+        return async (id) => {
+            let persons = this.getHiddenRelatives(id, type)
+            return Promise.all(persons.map(async (personId) => {
+                await fetchPerson(personId)
+                return personId
+            }))
+        }
     }
 
-    hasHiddenChildren = (id) => {
-        return this.getHiddenChildren(id).length > 0
-    }
-
-    getHiddenParents = (id) => {
+    _getHiddenParents = (id) => {
         let person = this.data[id]
         if (!person.parents) { return []}
 
@@ -41,7 +59,7 @@ class ControlCenter {
         return _.difference(parents, Array.from(this.visible))
     }
 
-    getHiddenPartners = (id) => {
+    _getHiddenPartners = (id) => {
         let person = this.data[id]
         if (person.marriages.length < 1) { return [] }
 
@@ -53,7 +71,7 @@ class ControlCenter {
         return _.difference(partners, Array.from(this.visible))
     }
 
-    getHiddenSiblings = (id) => {
+    _getHiddenSiblings = (id) => {
         let person = this.data[id]
         let parents = this.data[person.parents]
         if (!parents) { return [] }
@@ -62,7 +80,7 @@ class ControlCenter {
         return _.difference(siblings, Array.from(this.visible))
     }
 
-    getHiddenChildren = (id) => {
+    _getHiddenChildren = (id) => {
         let person = this.data[id]
         if (person.marriages.length < 1) { return [] }
 
@@ -72,37 +90,5 @@ class ControlCenter {
         }))
 
         return _.difference(children, Array.from(this.visible))
-    }
-
-    fetchHiddenParents = async (id) => {
-        let persons = this.getHiddenParents(id)
-        return Promise.all(persons.map(async (personId) => {
-            await fetchPerson(personId)
-            return personId
-        }))
-    }
-
-    fetchHiddenPartners = async (id) => {
-        let persons = this.getHiddenPartners(id)
-        return Promise.all(persons.map(async (personId) => {
-            await fetchPerson(personId)
-            return personId
-        }))
-    }
-
-    fetchHiddenSiblings = async (id) => {
-        let persons = this.getHiddenSiblings(id)
-        return Promise.all(persons.map(async (personId) => {
-            await fetchPerson(personId)
-            return personId
-        }))
-    }
-
-    fetchHiddenChildren = async (id) => {
-        let persons = this.getHiddenChildren(id)
-        return Promise.all(persons.map(async (personId) => {
-            await fetchPerson(personId)
-            return personId
-        }))
     }
 }

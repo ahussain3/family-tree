@@ -73,6 +73,8 @@ window.onload = function() {
         return p
     }
 
+    const toTitleCase = s => s.substr(0, 1).toUpperCase() + s.substr(1).toLowerCase();
+
     let renderPerson = function(id, x, y) {
         let person = data[id]
         var container = document.createElement("div")
@@ -80,21 +82,12 @@ window.onload = function() {
         container.id = id
         container.innerHTML = "<h3>" + person.name + "</h3>"
 
-        if (cc.hasHiddenParents(id)) {
-            container.append(createShowLink(id, "Parents", cc.fetchHiddenParents))
-        }
-
-        if (cc.hasHiddenPartners(id)) {
-            container.append(createShowLink(id, "Partners", cc.fetchHiddenPartners))
-        }
-
-        if (cc.hasHiddenSiblings(id)) {
-            container.append(createShowLink(id, "Siblings", cc.fetchHiddenSiblings))
-        }
-
-        if (cc.hasHiddenChildren(id)) {
-            container.append(createShowLink(id, "Children", cc.fetchHiddenChildren))
-        }
+        Object.values(RelativeType).forEach(type => {
+            if (cc.hasHiddenRelatives(id, type)) {
+                let label = toTitleCase(type)
+                container.append(createShowLink(id, label, cc.fetchHiddenRelatives(type)))
+            }
+        })
 
         container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
 
