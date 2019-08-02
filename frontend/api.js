@@ -67,7 +67,7 @@ let addMarriageToDataset = function(marriage) {
   data[marriage.id] = clone
 }
 
-let fetchPerson = async function (id, cb) {
+let _fetchPerson = async function (id, cb) {
   let variables = {"id": id}
   return graph(personQuery)(variables).then((response) => {
     let result = response["person"]
@@ -80,4 +80,12 @@ let fetchPerson = async function (id, cb) {
   }).catch(function (error) {
     console.log(error)
   })
+}
+
+let fetchPerson = async (id) => {
+    if (!Object.keys(this.data).includes(id)) {
+        await _fetchPerson(id, () => {})
+        return this.data[id]
+    }
+    return this.data[id]
 }

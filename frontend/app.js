@@ -237,7 +237,7 @@ window.onload = function() {
 
         while (queue.length > 0) {
             let id = queue.shift()
-            let person = await cc._fetchPerson(id)
+            let person = await fetchPerson(id)
 
             if (visible.has(person.id)) {
                 found = person.id
@@ -300,13 +300,8 @@ window.onload = function() {
         render()
     }
 
-    let changeFocus = function(event, value) {
-        focusedId = _.sample(Array.from(visible))
-        console.log(focusedId)
-        render()
-
-        let focused = document.getElementById(focusedId)
-        pannableContainer.panToPosition(focused, 0, 0)
+    let handleChangeFocus = function(event, value) {
+        changeFocus(_.sample(Array.from(visible)))
     }
 
     let handleClick = function(event, value) {
@@ -328,9 +323,20 @@ window.onload = function() {
         display: "name",
     });
 
+    let changeFocus = function(id) {
+        focusedId = id
+        render()
+        let focused = document.getElementById(focusedId)
+        pannableContainer.panToPosition(focused, 0, 0)
+    }
+
     let selectPerson = function(event, person) {
-      fetchPerson(person.id, (result) => {
+      fetchPerson(person.id).then(result => {
         addPerson(result.id)
+        setTimeout(() => changeFocus(result.id), 1)
+
+        // let focused = document.getElementById(focusedId)
+        // pannableContainer.panToPosition(focused, 0, 0)
       })
     }
 
@@ -338,6 +344,6 @@ window.onload = function() {
 
 
     document.querySelector("#tick-btn").addEventListener("click", handleClick)
-    document.querySelector("#focus-btn").addEventListener("click", changeFocus)
+    document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
     document.querySelector('#reset-btn').addEventListener("click", reset)
 };

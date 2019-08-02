@@ -33,14 +33,6 @@ class ControlCenter {
         return this.getHiddenChildren(id).length > 0
     }
 
-    _fetchPerson = async (id) => {
-        if (!Object.keys(this.data).includes(id)) {
-            await fetchPerson(id, () => {})
-            return this.data[id]
-        }
-        return this.data[id]
-    }
-
     getHiddenParents = (id) => {
         let person = this.data[id]
         if (!person.parents) { return []}
@@ -85,7 +77,7 @@ class ControlCenter {
     fetchHiddenParents = async (id) => {
         let persons = this.getHiddenParents(id)
         return Promise.all(persons.map(async (personId) => {
-            await this._fetchPerson(personId)
+            await fetchPerson(personId)
             return personId
         }))
     }
@@ -93,7 +85,7 @@ class ControlCenter {
     fetchHiddenPartners = async (id) => {
         let persons = this.getHiddenPartners(id)
         return Promise.all(persons.map(async (personId) => {
-            await this._fetchPerson(personId)
+            await fetchPerson(personId)
             return personId
         }))
     }
@@ -101,7 +93,7 @@ class ControlCenter {
     fetchHiddenSiblings = async (id) => {
         let persons = this.getHiddenSiblings(id)
         return Promise.all(persons.map(async (personId) => {
-            await this._fetchPerson(personId)
+            await fetchPerson(personId)
             return personId
         }))
     }
@@ -109,7 +101,7 @@ class ControlCenter {
     fetchHiddenChildren = async (id) => {
         let persons = this.getHiddenChildren(id)
         return Promise.all(persons.map(async (personId) => {
-            await this._fetchPerson(personId)
+            await fetchPerson(personId)
             return personId
         }))
     }
