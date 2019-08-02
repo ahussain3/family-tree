@@ -23,7 +23,7 @@ class Renderer {
         // Create a graph containing all the visible people
         visible.forEach(id => {
             let person = data[id]
-            let personNode = g.addNode(new Person(id, person.gender, person.birth_year))
+            let personNode = g.addNode(new Person(id, person.gender, person.birthYear))
 
             if (person.marriages.length != 0) {
                 person.marriages.forEach(id => {
@@ -32,7 +32,7 @@ class Renderer {
                     if (visible.has(partnerId)) {
                         let marriageNode = g.addNode(new Marriage(id))
                         let partner = data[partnerId]
-                        let partnerNode = g.addNode(new Person(partnerId, partner.gender, partner.birth_year))
+                        let partnerNode = g.addNode(new Person(partnerId, partner.gender, partner.birthYear))
 
                         marriageNode.setPartners(personNode, partnerNode)
                         personNode.addMarriage(marriageNode)
@@ -41,7 +41,7 @@ class Renderer {
                         marriage.children.forEach(childId => {
                             if (visible.has(childId)) {
                                 let child = data[childId]
-                                let childNode = g.addNode(new Person(childId, child.gender, child.birth_year))
+                                let childNode = g.addNode(new Person(childId, child.gender, child.birthYear))
                                 marriageNode.addChild(childNode)
                                 childNode.setParents(marriageNode)
                             }
