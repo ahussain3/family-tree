@@ -54,7 +54,7 @@ window.onload = function() {
         link.onclick = async () => {
             let result = await func(id)
             await result.reduce(
-                (p, id) => p.then(() => addPerson(id)),
+                (p, id) => p.then(() => addPerson(id).then(() => render())),
                 Promise.resolve(null)
             );
         }
@@ -282,7 +282,6 @@ window.onload = function() {
         await shortestPath(id, visible).then(result => {
             result.concat(id).forEach(item => {
                 visible.add(item)
-                render()
             })
         })
 
@@ -290,7 +289,9 @@ window.onload = function() {
 
     let hidePerson = function(id) {
         visible.delete(id)
-        if (focusedId == id) { focusedId = null }
+        if (focusedId == id) {
+            changeFocus(_.sample(Array.from(visible)))
+        }
         render()
     }
 
@@ -309,7 +310,7 @@ window.onload = function() {
         console.log(id)
         if (id == null) { return }
 
-        addPerson(id)
+        addPerson(id).then(() => render())
     }
 
     $('#search-bar input.typeahead').typeahead({
@@ -332,11 +333,8 @@ window.onload = function() {
 
     let selectPerson = function(event, person) {
       fetchPerson(person.id).then(result => {
-        addPerson(result.id)
-        setTimeout(() => changeFocus(result.id), 1)
-
-        // let focused = document.getElementById(focusedId)
-        // pannableContainer.panToPosition(focused, 0, 0)
+        addPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
+        setTimeout(() => $('#search-bar input.typeahead.tt-input').val(""), 10)
       })
     }
 
