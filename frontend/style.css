@@ -80,8 +80,14 @@ div.person {
     width: 100px;
     height: 200px;
     text-align: center;
-    border: 1px solid red;
-    cursor: default;
+    border: 2px solid red;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px;
+}
+
+div.person h3 {
+    font-size: 20px;
 }
 
 div.person.focused {
@@ -102,4 +108,16 @@ div.line {
 div.person p {
     font-size: 10pt;
     line-height: 11pt;
+}
+
+/* MODAL */
+
+div.modal-body h3, h4, h5 {
+    text-align: center;
+}
+
+div.modal-header {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
 }

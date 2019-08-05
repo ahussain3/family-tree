@@ -32,6 +32,7 @@ let personQuery = `query personQuery($id: ID) {
     residence
     birthYear
     deathYear
+    biography
     parents {
       __typename
       id

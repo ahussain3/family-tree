@@ -2,14 +2,9 @@ window.onload = function() {
     let pw = 100
     let ph = 200
 
-    // Object.prototype.keys = function() { return Object.keys(this) }
-    // Object.prototype.values = function() { return Object.values(this) }
-    // Object.prototype.items = function() { return _.zip(Object.keys(this), Object.values(this)) }
-
     var xhttp = new XMLHttpRequest();
-    // var data = {}  // keyed by id.
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set([])
+    var visible = new Set([])  // This breaks because of caching.
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -41,39 +36,52 @@ window.onload = function() {
         return element
     }
 
-    let createLink = function(id, name) {
+    let createLink = function(id, name, onclick) {
+        let p = document.createElement("p")
         let link = document.createElement("a")
         link.innerHTML = name
         link.href = "#"
-        return link
+        link.onclick = onclick
+        p.append(link)
+        return p
     }
 
     let createShowLink = function(id, name, func) {
-        let p = document.createElement("p")
-        let link = createLink(id, name)
-        link.onclick = async () => {
+        let link = createLink(id, name, async () => {
             let result = await func(id)
             await result.reduce(
                 (p, id) => p.then(() => addPerson(id).then(() => render())),
                 Promise.resolve(null)
             );
-        }
-        p.append(link)
-        return p
+        })
+        return link
     }
 
     let createHideLink = function(id, name, func) {
-        let p = document.createElement("p")
-        let link = createLink(id, name)
-        link.onclick = () => {
+        let link = createLink(id, name, () => {
             func(id)
             render()
-        }
-        p.append(link)
-        return p
+        })
+        return link
     }
 
     const toTitleCase = s => s.substr(0, 1).toUpperCase() + s.substr(1).toLowerCase();
+
+    let showModal = async function(id) {
+        let person = await fetchPerson(id)
+        let modal = $('#exampleModal')
+
+        let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
+
+        // name, residence, birth/death year, bio
+        modal.find(".modal-title").text(person.name)
+        modal.find(".modal-residence").text(person.residence)
+        modal.find(".modal-birth").text(birthString)
+        modal.find(".modal-bio").text(person.biography)
+
+        modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
+        modal.modal()
+    }
 
     let renderPerson = function(id, x, y) {
         let person = data[id]
@@ -88,6 +96,11 @@ window.onload = function() {
                 container.append(createShowLink(id, label, cc.fetchHiddenRelatives(type)))
             }
         })
+
+        let link = createLink(id, "Details", () => {
+            showModal(id)
+        })
+        container.append(link)
 
         container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
 
@@ -298,12 +311,12 @@ window.onload = function() {
         changeFocus(_.sample(Array.from(visible)))
     }
 
-    let handleClick = function(event, value) {
+    let handleRandomPerson = function(event, value) {
         let id = _.sample(_.difference(people, Array.from(visible)))
         console.log(id)
         if (id == null) { return }
 
-        addPerson(id).then(() => render())
+        addPerson(id).then(() => render()).then(() => changeFocus(id))
     }
 
     $('#search-bar input.typeahead').typeahead({
@@ -334,7 +347,7 @@ window.onload = function() {
     $('#search-bar input.typeahead.tt-input').bind('typeahead:select', selectPerson);
 
 
-    document.querySelector("#tick-btn").addEventListener("click", handleClick)
+    document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
     document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
     document.querySelector('#reset-btn').addEventListener("click", reset)
 };
