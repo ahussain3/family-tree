@@ -1,10 +1,14 @@
-# FAMILY TREE
+# Family Tree
 
 The goal of this project is to create a tool which lets users
 collaboratively create a family tree.
 
-- Neo4j database
-- GraphQL interface; centered around one user
-- React/Relay frontend; leverage caching
+To do next:
+- Make it possible to edit/add users and relationships
+- Authentication
+- Audit log of changes made
+- Set up a deployment system
+- Allow photo uploads
+- Do an aesthetics-only redesign
 
 
