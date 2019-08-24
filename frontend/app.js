@@ -4,7 +4,7 @@ window.onload = function() {
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set([])  // This breaks because of caching.
+    var visible = new Set(["P_w2E8ptQkkxq5"])  // This breaks because of caching.
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -69,7 +69,7 @@ window.onload = function() {
 
     let showModal = async function(id) {
         let person = await fetchPerson(id)
-        let modal = $('#exampleModal')
+        let modal = $('#detailModal')
 
         let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
 
@@ -217,7 +217,8 @@ window.onload = function() {
         }
     }
 
-    let main = function() {
+    let main = async function() {
+        await Promise.all([...visible].map(id => fetchPerson(id)))
         render()
     }
 
@@ -350,4 +351,5 @@ window.onload = function() {
     document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
     document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
     document.querySelector('#reset-btn').addEventListener("click", reset)
+    document.querySelector('#create-person').addEventListener("click", reset)
 };
