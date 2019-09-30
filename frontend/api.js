@@ -58,7 +58,14 @@ let addPersonToDataset = function(person) {
   var clone = Object.assign({}, person)
   clone.marriages = person.marriages.map(marriage => marriage.id)
   clone.parents = person.parents != null ? person.parents.id : null
+
+  person.marriages.forEach(marriage => addMarriageToDataset(marriage))
+  if (person.parents) {
+    addMarriageToDataset(person.parents)
+  }
+
   data[person.id] = clone
+  return clone
 }
 
 let addMarriageToDataset = function(marriage) {
@@ -68,16 +75,11 @@ let addMarriageToDataset = function(marriage) {
   data[marriage.id] = clone
 }
 
-let _fetchPerson = async function (id, cb) {
+let _fetchPerson = async function (id) {
   let variables = {"id": id}
   return graph(personQuery)(variables).then((response) => {
     let result = response["person"]
-    addPersonToDataset(result)
-    result.marriages.forEach(marriage => addMarriageToDataset(marriage))
-    if (result.parents) {
-      addMarriageToDataset(result.parents)
-    }
-    cb(result)
+    return addPersonToDataset(result)
   }).catch(function (error) {
     console.log(error)
   })
@@ -85,8 +87,69 @@ let _fetchPerson = async function (id, cb) {
 
 let fetchPerson = async (id) => {
     if (!Object.keys(this.data).includes(id)) {
-        await _fetchPerson(id, () => {})
+        await _fetchPerson(id)
         return this.data[id]
     }
     return this.data[id]
+}
+
+// TODO(Awais): I should really have fragments or something here
+let addPersonMutation = `mutation addPersonMutation(
+  $name: String!,
+  $gender: Gender!,
+  $birthYear: Int,
+  $deathYear: Int,
+  $residence: String, 
+) {
+  addPerson(
+    name: $name,
+    gender: $gender,
+    birthYear: $birthYear,
+    deathYear: $deathYear,
+    residence: $residence
+  ) {
+    person {
+      __typename
+      id
+      name
+      gender
+      photoUrl
+      residence
+      birthYear
+      deathYear
+      biography
+      parents {
+        __typename
+        id
+        startYear
+        endYear
+        partners { id }
+        children { id }
+      }
+      marriages {
+        __typename
+        id
+        startYear
+        endYear
+        partners { id }
+        children { id }
+      }
+    }
+  }
+}`
+
+let addPerson = async function(name, gender, birthYear, deathYear, residence) {
+  let variables = {
+    "name": name,
+    "gender": gender,
+    "birthYear": birthYear || null,
+    "deathYear": deathYear || null,
+    "residence": residence || null,
+  }
+  return graph(addPersonMutation)(variables).then((response) => {
+    let result = response["addPerson"]["person"]
+    return addPersonToDataset(result)
+  }).catch(function (error) {
+    console.log(error)
+  })
 }

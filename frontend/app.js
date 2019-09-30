@@ -50,7 +50,7 @@ window.onload = function() {
         let link = createLink(id, name, async () => {
             let result = await func(id)
             await result.reduce(
-                (p, id) => p.then(() => addPerson(id).then(() => render())),
+                (p, id) => p.then(() => showPerson(id).then(() => render())),
                 Promise.resolve(null)
             );
         })
@@ -68,9 +68,14 @@ window.onload = function() {
     const toTitleCase = s => s.substr(0, 1).toUpperCase() + s.substr(1).toLowerCase();
 
     let showModal = async function(id) {
-        let person = await fetchPerson(id)
         let modal = $('#detailModal')
 
+        if (id == null) {
+            modal.modal()
+            return
+        }
+
+        let person = await fetchPerson(id)
         let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
 
         // name, residence, birth/death year, bio
@@ -78,8 +83,8 @@ window.onload = function() {
         modal.find(".modal-residence").text(person.residence)
         modal.find(".modal-birth").text(birthString)
         modal.find(".modal-bio").text(person.biography)
-
         modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
+
         modal.modal()
     }
 
@@ -284,7 +289,7 @@ window.onload = function() {
     }
 
     // INTERACTION
-    let addPerson = async function(id) {
+    let showPerson = async function(id) {
         // calculate shortest path from this person to another node that is already visible
         await shortestPath(id, visible).then(result => {
             result.concat(id).forEach(item => {
@@ -317,7 +322,7 @@ window.onload = function() {
         console.log(id)
         if (id == null) { return }
 
-        addPerson(id).then(() => render()).then(() => changeFocus(id))
+        showPerson(id).then(() => render()).then(() => changeFocus(id))
     }
 
     $('#search-bar input.typeahead').typeahead({
@@ -340,16 +345,34 @@ window.onload = function() {
 
     let selectPerson = function(event, person) {
       fetchPerson(person.id).then(result => {
-        addPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
+        showPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
         setTimeout(() => $('#search-bar input.typeahead.tt-input').val(""), 10)
       })
     }
 
     $('#search-bar input.typeahead.tt-input').bind('typeahead:select', selectPerson);
 
+    let handleCreatePerson = () => {
+        showModal(null)
+    }
+
+    let submitCreatePerson = async () => {
+        console.log("submitCreatePerson() called")
+        let form = document.querySelector("#create-person-form")
+
+        result = await addPerson(
+            form["name"].value,
+            "MALE", // form["gender"].value,
+            form["birth-year"].value,
+            form["death-year"].value,
+            form["residence"].value,
+        )
+        debugger
+    }
 
     document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
     document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
     document.querySelector('#reset-btn').addEventListener("click", reset)
-    document.querySelector('#create-person').addEventListener("click", reset)
+    document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
+    document.querySelector("#create-person-form").addEventListener("submit", submitCreatePerson)
 };
