@@ -66,7 +66,7 @@ def search_persons(name):
     return list(result)
 
 # Create new entries
-def add_person(name, gender, *, residence, birth_year, death_year):
+def add_person(name, gender, *, residence, birth_year, death_year, biography):
     person = Node(NodeType.PERSON.value, opaque_id=make_opaque_id("P"), **locals())
     graph.create(person)
     return person

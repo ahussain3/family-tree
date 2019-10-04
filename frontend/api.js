@@ -94,19 +94,23 @@ let fetchPerson = async (id) => {
 }
 
 // TODO(Awais): I should really have fragments or something here
-let addPersonMutation = `mutation addPersonMutation(
+let upsertPersonMutation = `mutation upsertPersonMutation(
+  $id: ID,
   $name: String!,
   $gender: Gender!,
   $birthYear: Int,
   $deathYear: Int,
-  $residence: String, 
+  $residence: String,
+  $biography: String,
 ) {
-  addPerson(
+  upsertPerson(
+    id: $id,
     name: $name,
     gender: $gender,
     birthYear: $birthYear,
     deathYear: $deathYear,
-    residence: $residence
+    residence: $residence,
+    biography: $biography,
   ) {
     person {
       __typename
@@ -138,16 +142,17 @@ let addPersonMutation = `mutation addPersonMutation(
   }
 }`
 
-let addPerson = async function(name, gender, birthYear, deathYear, residence) {
+let upsertPerson = async function(name, gender, birthYear, deathYear, residence, biography) {
   let variables = {
     "name": name,
     "gender": gender,
     "birthYear": birthYear || null,
     "deathYear": deathYear || null,
     "residence": residence || null,
+    "biography": biography || null,
   }
-  return graph(addPersonMutation)(variables).then((response) => {
-    let result = response["addPerson"]["person"]
+  return graph(upsertPersonMutation)(variables).then((response) => {
+    let result = response["upsertPerson"]["person"]
     return addPersonToDataset(result)
   }).catch(function (error) {
     console.log(error)

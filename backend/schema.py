@@ -50,32 +50,20 @@ class Marriage(gql.ObjectType):
     partners = gql.List(lambda: Person)
     children = gql.List(lambda: Person)
 
-class AddPerson(gql.Mutation):
+class UpsertPerson(gql.Mutation):
     class Arguments:
-        name = gql.String(required=True)
-        gender = GenderType(required=True)
-        residence = gql.String()
-        birth_year = gql.Int()
-        death_year = gql.Int()
-
-    person = gql.Field(Person, required=True)
-
-    def mutate(self, info, **user_args):
-        return mutate_add_person(info, **user_args)
-
-class UpdatePerson(gql.Mutation):
-    class Arguments:
-        id = gql.ID(required=True)
+        id = gql.ID()
         name = gql.String()
         gender = GenderType()
         residence = gql.String()
         birth_year = gql.Int()
         death_year = gql.Int()
+        biography = gql.String()
 
     person = gql.Field(Person, required=True)
 
     def mutate(self, info, **user_args):
-        return mutate_update_person(info, **user_args)
+        return mutate_upsert_person(info, **user_args)
 
 class AddMarriage(gql.Mutation):
     class Arguments:
@@ -105,11 +93,9 @@ class Query(gql.ObjectType):
     search_persons = gql.Field(gql.List(Person), name=gql.String())
 
 class Mutation(gql.ObjectType):
-    add_person = AddPerson.Field(required=True)
-    update_person = UpdatePerson.Field(required=True)
+    upsert_person = UpsertPerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
     add_child = AddChildren.Field(required=True)
-
 
 # Resolvers
 @resolver_for(Query, "person")
@@ -160,21 +146,31 @@ def marriage_children(self, info):
     return sorted(children, key=lambda child: child.birth_year)
 
 # Mutators
-def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, death_year=None):
-    result = database.add_person(
-        name=name,
-        gender=gender,
-        residence=residence,
-        birth_year=birth_year,
-        death_year=death_year,
-    )
-    return AddPerson(person=mk_person(result))
+def mutate_upsert_person(
+    info, *,
+    id=None,
+    name=None,
+    gender=None,
+    residence=None,
+    birth_year=None,
+    death_year=None,
+    biography=None,
+):
+    if id is None:
+        result = database.add_person(
+            name=name,
+            gender=gender,
+            residence=residence,
+            birth_year=birth_year,
+            death_year=death_year,
+            biography=biography,
+        )
+    else:
+        args = locals().copy()
+        args.pop("info", None)
+        result = database.update_person(**args)
 
-def mutate_update_person(info, *, id, name=None, gender=None, residence=None, birth_year=None, death_year=None):
-    args = locals().copy()
-    args.pop("info", None)
-    person = database.update_person(**args)
-    return UpdatePerson(person=mk_person(person))
+    return UpsertPerson(person=mk_person(result))
 
 def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, end_year=None):
     partner_a = database.get_node(partner_a_id)
