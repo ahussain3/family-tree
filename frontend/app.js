@@ -359,10 +359,9 @@ window.onload = function() {
     let submitCreatePerson = async () => {
         console.log("submitCreatePerson() called")
         let form = document.querySelector("#create-person-form")
-
         result = await addPerson(
             form["name"].value,
-            "MALE", // form["gender"].value,
+            form["gender"].value,
             form["birth-year"].value,
             form["death-year"].value,
             form["residence"].value,
