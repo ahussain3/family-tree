@@ -79,8 +79,8 @@ class AddMarriage(gql.Mutation):
 
 class AddChildren(gql.Mutation):
     class Arguments:
-        parent_ids = gql.List(gql.ID, required=True)
-        child_id = gql.ID(required=True)
+        marriage_id = gql.ID(required=True)
+        children_ids = gql.List(gql.ID, required=True)
 
     children = gql.Field(gql.List(Person), required=True)
 
@@ -91,6 +91,7 @@ class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
     person = gql.Field(Person, id=gql.ID())
     search_persons = gql.Field(gql.List(Person), name=gql.String())
+    search_marriages = gql.Field(gql.List(Marriage), name=gql.String())
 
 class Mutation(gql.ObjectType):
     upsert_person = UpsertPerson.Field(required=True)
@@ -107,6 +108,15 @@ def query_person(self, info, *, id):
 def query_search_persons(self, info, *, name):
     persons = database.search_persons(name)
     return [mk_person(person) for person in persons]
+
+@resolver_for(Query, "search_marriages")
+def query_search_marriages(self, info, *, name):
+    persons = database.search_persons(name)
+    result = []
+    for person in persons:
+        partners = database.get_partners(person['opaque_id'])
+        result = result + [mk_marriage(mk_person(person), mk_person(partner)) for partner in partners]
+    return result
 
 @resolver_for(Person, "parents")
 def person_parents(self, info):

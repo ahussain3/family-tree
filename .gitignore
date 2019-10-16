@@ -2,6 +2,9 @@ __pycache__
 yarn-error.log
 */.DS_Store
 .vscode/
+.idea/*
+.idea*
+.tern-project
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -325,17 +325,6 @@ window.onload = function() {
         showPerson(id).then(() => render()).then(() => changeFocus(id))
     }
 
-    $('#search-bar input.typeahead').typeahead({
-        hint: true,
-        highlight: true, /* Enable substring highlighting */
-        minLength: 1 /* Specify minimum characters required for showing result */
-    },
-    {
-        name: 'searchPersons',
-        source: searchPersons,
-        display: "name",
-    });
-
     let changeFocus = function(id) {
         focusedId = id
         render()
@@ -346,15 +335,35 @@ window.onload = function() {
     let selectPerson = function(event, person) {
       fetchPerson(person.id).then(result => {
         showPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
-        setTimeout(() => $('#search-bar input.typeahead.tt-input').val(""), 10)
+        setTimeout(() => $('#search-bar-typeahead input.typeahead.tt-input').val(""), 10)
       })
     }
-
-    $('#search-bar input.typeahead.tt-input').bind('typeahead:select', selectPerson);
 
     let handleCreatePerson = () => {
         showModal(null)
     }
+
+    let chooseMarriage = function(event, marriage) {
+        debugger
+    }
+
+    let initTypeahead = function(id, source, handler, display) {
+        $(id + ' input.typeahead').typeahead({
+                hint: true,
+                highlight: true, /* Enable substring highlighting */
+                minLength: 1 /* Specify minimum characters required for showing result */
+            },
+            {
+                name: 'searchPersons',
+                source: source,
+                display: display || "name",
+            });
+
+        $(id + ' input.typeahead.tt-input').bind('typeahead:select', handler);
+    }
+
+    initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
+    initTypeahead("#parents-typeahead", searchMarriages, chooseMarriage, "partnerNames")
 
     let submitCreatePerson = async () => {
         console.log("submitCreatePerson() called")
@@ -367,7 +376,6 @@ window.onload = function() {
             form["residence"].value,
             form["biography"].value,
         )
-        debugger
     }
 
     document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)

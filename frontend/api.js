@@ -6,7 +6,7 @@ var graph = graphql(url, {
 })
 
 let searchPersonsQuery = `query searchPersonsQuery($name: String) {
-  searchPersons(name: $name)  {
+  searchPersons(name: $name) {
     id
     name
   }
@@ -154,6 +154,29 @@ let upsertPerson = async function(name, gender, birthYear, deathYear, residence,
   return graph(upsertPersonMutation)(variables).then((response) => {
     let result = response["upsertPerson"]["person"]
     return addPersonToDataset(result)
+  }).catch(function (error) {
+    console.log(error)
+  })
+}
+
+let searchMarriagesQuery = `query searchMarriagesQuery($name: String) {
+  searchMarriages(name: $name)  {
+    id
+    partners {
+      id
+      name
+    }
+  }
+}`
+
+let searchMarriages = function(query, sync, async) {
+  let variables = {"name": query}
+  graph(searchMarriagesQuery)(variables).then(function (response) {
+    let result = response["searchMarriages"]
+    result.forEach((marriage) => {
+      marriage["partnerNames"] = marriage.partners.map((partner) => partner.name).join(" and ")
+    })
+    async(result)
   }).catch(function (error) {
     console.log(error)
   })

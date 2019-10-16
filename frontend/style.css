@@ -12,14 +12,14 @@ body {
 }
 
 /* SEARCH INPUT BAR */
-#search-bar {
+#search-bar-typeahead {
     font-family: sans-serif;
     position: relative;
 }
 .twitter-typeahead {
     display: block;
 }
-.typeahead, .tt-query, .tt-hint {
+#search-bar-typeahead.typeahead, .tt-query, .tt-hint {
     border: none;
     border-bottom: 2px solid black;
     font-size: 22px; /* Set input font size */
@@ -29,7 +29,7 @@ body {
     margin: 10px auto;
     outline: none;
 }
-.typeahead {
+#search-bar-typeahead.typeahead {
     background-color: #FFFFFF;
 }
 .typeahead:focus {
