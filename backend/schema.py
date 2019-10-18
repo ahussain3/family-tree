@@ -96,7 +96,7 @@ class Query(gql.ObjectType):
 class Mutation(gql.ObjectType):
     upsert_person = UpsertPerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
-    add_child = AddChildren.Field(required=True)
+    add_children = AddChildren.Field(required=True)
 
 # Resolvers
 @resolver_for(Query, "person")

@@ -181,3 +181,33 @@ let searchMarriages = function(query, sync, async) {
     console.log(error)
   })
 }
+
+let addChildrenMutation = `mutation addChildrenMutation(
+  $marriageId: ID!, 
+  $childrenIds: [ID],
+) {
+  addChildren(
+    marriageId: $marriageId,
+    childrenIds: $childrenIds,
+  ) {
+    children {
+      id
+      name
+    }
+  }
+}`
+
+
+let addChildren = async function(marriage_id, children_ids) {
+  let variables = {
+    "marriageId": marriage_id,
+    "childrenIds": children_ids,
+  }
+  return graph(addChildrenMutation)(variables).then((response) => {
+    let result = response["addChildren"]
+    debugger
+    return result
+  }).catch(function (error) {
+    console.log(error)
+  })
+}

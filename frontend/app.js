@@ -230,7 +230,7 @@ window.onload = function() {
     main()
 
     // Find the shortest path from the node identified by 'source' and any visible node
-    // If there are multiple shortests paths of the same length, it arbitrarily
+    // If there are multiple shortest paths of the same length, it arbitrarily
     // returns one of the shortest paths
     // Returns: list of ids of all nodes that are on a shortest path, including
     // the already visible node, but not including the source node.
@@ -343,8 +343,13 @@ window.onload = function() {
         showModal(null)
     }
 
-    let chooseMarriage = function(event, marriage) {
+    let setParents = async function(event, marriage) {
         debugger
+        // how do I get a self id if the person hasn't been created yet?
+        // alternatively, how I can enforce that an id exists by this point?
+        // I can pass a marriage id in to the create user function
+        // Then I will have a fresh problem when I get to marriages and children
+        // addChildren(marriage.id, )
     }
 
     let initTypeahead = function(id, source, handler, display) {
@@ -363,7 +368,7 @@ window.onload = function() {
     }
 
     initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
-    initTypeahead("#parents-typeahead", searchMarriages, chooseMarriage, "partnerNames")
+    initTypeahead("#parents-typeahead", searchMarriages, setParents, "partnerNames")
 
     let submitCreatePerson = async () => {
         console.log("submitCreatePerson() called")
