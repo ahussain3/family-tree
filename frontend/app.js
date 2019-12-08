@@ -370,6 +370,24 @@ window.onload = function() {
     initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
     initTypeahead("#parents-typeahead", searchMarriages, setParents, "partnerNames")
 
+
+    let addPartnerRow = function() {
+        console.log("add row")
+        newRow=`<tr>
+        <td><input type="text" name="partner" class="form-control"/></td>
+        <td><input type="text" name="children" class="form-control"/></td>
+        <td><input type="button" class="ibtnDel btn btn-md btn-danger "value="X"></td>
+        </tr>`
+        element = $(newRow)
+        $("#partners-table > tbody").append(element)
+    }
+
+    $("#addrow").on("click", addPartnerRow)
+
+    $("table.order-list").on("click", ".ibtnDel", function (event) {
+        $(this).closest("tr").remove();
+    });
+
     let submitCreatePerson = async () => {
         console.log("submitCreatePerson() called")
         let form = document.querySelector("#create-person-form")

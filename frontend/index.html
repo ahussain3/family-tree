@@ -59,6 +59,34 @@
                 <label for="parents">Parents</label>
                 <input type="text" class="form-control typeahead tt-query" id="parents" autocomplete="off" spellcheck="false">
               </div>
+              <table id="partners-table" class="table order-list">
+                  <thead>
+                  <tr>
+                      <td>Partner</td>
+                      <td>Children</td>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                        <td><input type="text" name="partner" class="form-control"/></td>
+                        <td>
+                            <input type="mail" name="children"  class="form-control"/>
+                        </td>
+                        <td><input type="button" class="ibtnDel btn btn-md btn-danger "value="X"></td>
+                        </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align: left;">
+                            <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+                        </td>
+                    </tr>
+                  <tr>
+                  </tr>
+                  </tfoot>
+              </table>
+
               <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>
