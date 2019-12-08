@@ -1,10 +1,15 @@
 <html>
     <head>
-        <script src="./js/jquery-3.3.1.slim.min.js"></script>
+        <script
+          src="https://code.jquery.com/jquery-3.4.1.js"
+          integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+          crossorigin="anonymous"></script>
         <script src="./js/popper-1.14.7.min.js"></script>
         <script src="./js/bootstrap-4.3.1.min.js"></script>
         <link rel="stylesheet" href="./css/bootstrap-4.3.1.min.css">
         <link rel="stylesheet" href="./style.css">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
 
         <script src="./js/typeahead.js"></script>
         <script src="./js/underscore.js"></script>
@@ -16,6 +21,7 @@
         <script src="./graph.js"></script>
         <script src="./renderer.js"></script>
         <script src="./app.js"></script>
+
     </head>
     <body>
     <div id="search-bar-typeahead">
@@ -68,10 +74,8 @@
                   </thead>
                   <tbody>
                     <tr>
-                        <td><input type="text" name="partner" class="form-control"/></td>
-                        <td>
-                            <input type="mail" name="children"  class="form-control"/>
-                        </td>
+                        <td><select class="partner-typeahead" style="width: 100%"></select></td>
+                        <td><select class="children-typeahead" multiple="multiple" style="width: 120%"></select></td>
                         <td><input type="button" class="ibtnDel btn btn-md btn-danger "value="X"></td>
                         </td>
                     </tr>

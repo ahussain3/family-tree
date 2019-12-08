@@ -370,17 +370,50 @@ window.onload = function() {
     initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
     initTypeahead("#parents-typeahead", searchMarriages, setParents, "partnerNames")
 
+    let make_person_typeahead = function(element) {
+        element.select2({
+          ajax: {
+            method: "POST",
+            url: url,
+            headers: {},
+            contentType: "application/json",
+            data: function(params) {
+                return JSON.stringify({
+                    query: searchPersonsQuery,
+                    variables: {"name": params.term}
+                })
+            },
+            processResults: function (data) {
+                if (!data) {
+                    return null
+                }
+                return {
+                    "results": data["data"]["searchPersons"].map(p => {
+                        return {"id": p.id, "text": p.name}
+                    })
+                }
+            }
+          }
+        });
+    }
+
+    make_person_typeahead($(".partner-typeahead"))
+    make_person_typeahead($(".children-typeahead"))
 
     let addPartnerRow = function() {
         console.log("add row")
         newRow=`<tr>
-        <td><input type="text" name="partner" class="form-control"/></td>
-        <td><input type="text" name="children" class="form-control"/></td>
+        <td><select class="partner-typeahead" style="width: 100%"></select></td>
+        <td><select class="children-typeahead" multiple="multiple" style="width: 120%"></select></td>
         <td><input type="button" class="ibtnDel btn btn-md btn-danger "value="X"></td>
         </tr>`
         element = $(newRow)
         $("#partners-table > tbody").append(element)
     }
+
+    initTypeahead("#partner-typeahead", searchPersons, selectPerson, "name")
+    initTypeahead("#children-typeahead", searchPersons, selectPerson, "name")
+
 
     $("#addrow").on("click", addPartnerRow)
 
