@@ -50,6 +50,11 @@ class Marriage(gql.ObjectType):
     partners = gql.List(lambda: Person)
     children = gql.List(lambda: Person)
 
+class MarriageInput(gql.InputObjectType):
+    partner_a_id = gql.String(required=True)
+    partner_b_id = gql.String(required=True)
+    children = gql.List(gql.String)
+
 class UpsertPerson(gql.Mutation):
     class Arguments:
         id = gql.ID()
@@ -59,6 +64,8 @@ class UpsertPerson(gql.Mutation):
         birth_year = gql.Int()
         death_year = gql.Int()
         biography = gql.String()
+        parents = gql.String()
+        marriages = gql.List(MarriageInput)
 
     person = gql.Field(Person, required=True)
 
@@ -165,7 +172,11 @@ def mutate_upsert_person(
     birth_year=None,
     death_year=None,
     biography=None,
+    parents=None,
+    marriages=None,
 ):
+    marriages = marriages or []
+
     if id is None:
         result = database.add_person(
             name=name,
@@ -176,9 +187,28 @@ def mutate_upsert_person(
             biography=biography,
         )
     else:
-        args = locals().copy()
-        args.pop("info", None)
-        result = database.update_person(**args)
+        result = database.update_person(
+            id=id,
+            name=name,
+            gender=gender,
+            residence=residence,
+            birth_year=birth_year,
+            death_year=death_year,
+            biography=biography
+        )
+
+    if parents is not None:
+        mutate_add_children(info=info, marriage_id=parents, children_ids=[id])
+
+    for marriage in marriages:
+        partner_a = database.get_node(marriage.partner_a_id)
+        partner_b = database.get_node(marriage.partner_b_id)
+        children = [database.get_node(child_id) for child_id in marriage.children]
+
+        if database.is_married(partner_a, partner_b):
+            database.set_children(partner_a, partner_b, children)
+        else:
+            database.add_marriage(partner_a, partner_b, children)
 
     return UpsertPerson(person=mk_person(result))
 
@@ -200,11 +230,13 @@ def mutate_add_children(info, *, marriage_id, children_ids):
     children = [database.get_node(child_id) for child_id in children_ids]
     parent_ids = marriage_id.split("+")
 
-    for parent_id in parent_ids:
-        assert child_id != parent_id, "A person cannot be their own child"
+    for child in children:
+        database.delete_parents(child)
 
-        parent = database.get_node(parent_id)
-        for child in children:
+        for parent_id in parent_ids:
+            parent = database.get_node(parent_id)
+            assert child["opaque_id"] != parent_id, "A person cannot be their own child"
+
             database.add_child(
                 parent=parent,
                 child=child
