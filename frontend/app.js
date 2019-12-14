@@ -82,7 +82,8 @@ window.onload = function() {
         })
 
         let link = createLink(id, "Details", () => {
-            showEditModal(id)
+            showModal(id)
+            // showEditModal(id)
         })
         container.append(link)
 
@@ -328,7 +329,6 @@ window.onload = function() {
     let showModal = async function(id) {
         let modal = $('#detailModal')
         if (id == null) {
-            modal.modal()
             return
         }
 
@@ -336,10 +336,11 @@ window.onload = function() {
         let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
 
         // name, residence, birth/death year, bio
+        modal.find("#id").text(id)
         modal.find(".modal-title").text(person.name)
         modal.find(".modal-residence").text(person.residence)
         modal.find(".modal-birth").text(birthString)
-        modal.find(".modal-bio").text(person.biography)
+        modal.find(".modal-bio").text(person.biography || "No bio has been provided yet for this person.")
         modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
 
         modal.modal()
@@ -354,10 +355,17 @@ window.onload = function() {
         }
     }
 
+    let handleEditPerson = function() {
+        let id = $('#detailModal').find("#id").text()
+        showEditModal(id)
+    }
+
     let showEditModal = async function(id) {
         let modal = $('#editModal')
 
         if (id == null) {
+            document.getElementById("edit-person-form").reset()
+            $("#partners-table > tbody").empty()
             modal.modal()
             return
         }
@@ -525,4 +533,5 @@ window.onload = function() {
     document.querySelector('#reset-btn').addEventListener("click", reset)
     document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
     document.querySelector("#submit-edit-form-btn").addEventListener("click", submitEditPerson)
+    document.querySelector('#show-edit-modal').addEventListener("click", handleEditPerson)
 };

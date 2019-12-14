@@ -28,8 +28,35 @@
         <input type="text" class="typeahead tt-query" id="search-bar" autocomplete="off" spellcheck="false">
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div id="id" style="visibility: hidden;"></div>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h3 class="modal-title">Modal title</h3>
+            <h4 class="modal-residence">Place of residence</h4>
+            <h5 class="modal-birth">Date of Birth</h5>
+            <p class="modal-bio">A bio has not been entered for this person yet.</p>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="show-edit-modal" class="btn btn-primary">Edit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="11" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-body">
@@ -102,21 +129,3 @@
     </div>
     </body>
 </html>
-
-
-<!--           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <h3 class="modal-title">Modal title</h3>
-            <h4 class="modal-residence">Place of residence</h4>
-            <h5 class="modal-birth">Date of Birth</h5>
-            <p class="modal-bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eget leo arcu. Vestibulum feugiat nec ante in efficitur. Sed non.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Edit</button>
-          </div>
- -->

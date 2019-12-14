@@ -130,6 +130,11 @@ div.modal-header {
     background-position: center;
 }
 
-#parents-typeahead .tt-suggestion {
-    font-size: 16px;
+div.modal-dialog {
+    background-color: white;
+    border-radius: 5px;
+}
+
+p.modal-bio {
+    text-align: center;
 }
