@@ -293,18 +293,6 @@ window.onload = function() {
         render()
     }
 
-    let handleChangeFocus = function(event, value) {
-        changeFocus(_.sample(Array.from(visible)))
-    }
-
-    let handleRandomPerson = function(event, value) {
-        let id = _.sample(_.difference(people, Array.from(visible)))
-        console.log(id)
-        if (id == null) { return }
-
-        showPerson(id).then(() => render()).then(() => changeFocus(id))
-    }
-
     let changeFocus = function(id) {
         if (focusedId == id) {
             return
@@ -528,8 +516,6 @@ window.onload = function() {
         render()
     }
 
-    document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
-    document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
     document.querySelector('#reset-btn').addEventListener("click", reset)
     document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
     document.querySelector("#submit-edit-form-btn").addEventListener("click", submitEditPerson)
