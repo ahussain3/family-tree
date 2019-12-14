@@ -44,6 +44,13 @@ class ControlCenter {
     fetchHiddenRelatives = (type) => {
         return async (id) => {
             let persons = this.getHiddenRelatives(id, type)
+            if (type == RelativeType.CHILDREN) {
+                let partners = this.getHiddenRelatives(id, RelativeType.PARTNERS)
+                await Promise.all(partners.map(async(partnerId) => {
+                    await fetchPerson(partnerId)
+                }))
+            }
+
             return Promise.all(persons.map(async (personId) => {
                 await fetchPerson(personId)
                 return personId
