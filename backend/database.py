@@ -102,6 +102,14 @@ def delete_parents(child):
         graph.separate(get_relationship([child, parent], RelationshipType.PARENT.value))
         graph.separate(get_relationship([parent, child], RelationshipType.CHILD.value))
 
+def set_parents(marriage_id, child):
+    parent_ids = marriage_id.split("+")
+    delete_parents(child)
+
+    for parent_id in parent_ids:
+        parent = get_node(parent_id)
+        add_child(parent, child)
+
 def set_children(parent_a, parent_b, children):
     for child in [*get_children(parent_a["opaque_id"]), *get_children(parent_b["opaque_id"])]:
         for rel in get_relationships(child["opaque_id"], RelationshipType.PARENT.value):

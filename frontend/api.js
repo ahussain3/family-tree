@@ -93,6 +93,27 @@ let fetchPerson = async (id) => {
     return this.data[id]
 }
 
+let getMarriage = (id) => {
+    marriage = data[id]
+    if (marriage == undefined) {
+      return null
+    }
+    return marriage
+    // const partners = await Promise.all(marriage.partners.map(p => fetchPerson(p)))
+    // const children = await Promise.all(marriage.children.map(c => fetchPerson(c)))
+    // return partners.map(p => p.name).join(" and ")
+}
+
+
+let getMarriageDescription = async (id) => {
+    marriage = data[id]
+    if (marriage == undefined) {
+      return null
+    }
+    const partners = await Promise.all(marriage.partners.map(p => fetchPerson(p)))
+    return partners.map(p => p.name).join(" and ")
+}
+
 // TODO(Awais): I should really have fragments or something here
 let upsertPersonMutation = `mutation upsertPersonMutation(
   $id: ID,
@@ -102,6 +123,8 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
   $deathYear: Int,
   $residence: String,
   $biography: String,
+  $parents: String,
+  $marriages: [MarriageInput],
 ) {
   upsertPerson(
     id: $id,
@@ -111,6 +134,8 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
     deathYear: $deathYear,
     residence: $residence,
     biography: $biography,
+    parents: $parents,
+    marriages: $marriages
   ) {
     person {
       __typename
@@ -142,14 +167,17 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
   }
 }`
 
-let upsertPerson = async function(name, gender, birthYear, deathYear, residence, biography) {
+let upsertPerson = async function(id, name, gender, birthYear, deathYear, residence, biography, parents, marriages) {
   let variables = {
+    "id": id,
     "name": name,
     "gender": gender,
     "birthYear": birthYear || null,
     "deathYear": deathYear || null,
     "residence": residence || null,
     "biography": biography || null,
+    "parents": parents || null,
+    "marriages": marriages || null,
   }
   return graph(upsertPersonMutation)(variables).then((response) => {
     let result = response["upsertPerson"]["person"]

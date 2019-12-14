@@ -29,11 +29,12 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-body">
-            <form id="create-person-form" autocomplete="off">
+            <form id="edit-person-form" autocomplete="off">
+               <input type="hidden" id="id" name="id">
               <div class="form-group">
                 <label for="name">Full Name</label>
                 <input type="text" class="form-control" id="name" placeholder="Full Name">
@@ -61,9 +62,9 @@
                 <label for="biography">Biography:</label>
                 <textarea class="form-control" id="biography" rows="3" placeholder="Biography"></textarea>
               </div>
-              <div id="parents-typeahead" class="form-group">
+              <div class="form-group">
                 <label for="parents">Parents</label>
-                <input type="text" class="form-control typeahead tt-query" id="parents" autocomplete="off" spellcheck="false">
+                <select class="parents-typeahead" id="parents" style="width: 100%"></select>
               </div>
               <table id="partners-table" class="table order-list">
                   <thead>
@@ -73,12 +74,11 @@
                   </tr>
                   </thead>
                   <tbody>
-                    <tr>
+<!--                     <tr>
                         <td><select class="partner-typeahead" style="width: 100%"></select></td>
                         <td><select class="children-typeahead" multiple="multiple" style="width: 120%"></select></td>
                         <td><input type="button" class="ibtnDel btn btn-md btn-danger "value="X"></td>
-                        </td>
-                    </tr>
+                    </tr> -->
                   </tbody>
                   <tfoot>
                     <tr>
