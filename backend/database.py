@@ -84,19 +84,6 @@ def update_person(id, **kwargs):
     graph.push(person)
     return person
 
-def add_marriage(person_a, person_b, children, *, start_year, end_year):
-    rel_a = Relationship(person_a, RelationshipType.PARTNER.value, person_b, start_year=start_year, end_year=end_year)
-    rel_b = Relationship(person_b, RelationshipType.PARTNER.value, person_a, start_year=start_year, end_year=end_year)
-
-    graph.create(rel_a)
-    graph.create(rel_b)
-
-    for child in children:
-        add_child(person_a, child)
-        add_child(person_b, child)
-
-    return (person_a, person_b)
-
 def delete_parents(child):
     for parent in get_parents(child["opaque_id"]):
         graph.separate(get_relationship([child, parent], RelationshipType.PARENT.value))
@@ -110,20 +97,36 @@ def set_parents(marriage_id, child):
         parent = get_node(parent_id)
         add_child(parent, child)
 
-def set_children(parent_a, parent_b, children):
-    for child in [*get_children(parent_a["opaque_id"]), *get_children(parent_b["opaque_id"])]:
-        for rel in get_relationships(child["opaque_id"], RelationshipType.PARENT.value):
-            graph.separate(rel)
 
-    for rel in get_relationships(parent_a["opaque_id"], RelationshipType.CHILD.value):
-        graph.separate(rel)
+def delete_children(person_a, person_b):
+    a_children = get_children(person_a["opaque_id"])
+    b_children = get_children(person_b["opaque_id"])
 
-    for rel in get_relationships(parent_b["opaque_id"], RelationshipType.CHILD.value):
-        graph.separate(rel)
+    children = [child for child in a_children if child in b_children]
 
     for child in children:
-        add_child(parent_a, child)
-        add_child(parent_b, child)
+        delete_parents(child)
+
+def delete_marriages(person):
+    for partner in get_partners(person["opaque_id"]):
+        graph.separate(get_relationship([person, partner], RelationshipType.PARTNER.value))
+        delete_children(person, partner)
+
+def add_marriage(person_a, person_b, children):
+    if not is_married(person_a, person_b):
+        rel_a=Relationship(person_a, RelationshipType.PARTNER.value, person_b)
+        rel_b=Relationship(person_b, RelationshipType.PARTNER.value, person_a)
+
+        graph.create(rel_a)
+        graph.create(rel_b)
+
+    delete_children(person_a, person_b)
+
+    for child in children:
+        add_child(person_a, child)
+        add_child(person_b, child)
+
+    return (person_a, person_b)
 
 def update_marriage(person_a, person_b):
     # TODO(Awais)

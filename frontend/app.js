@@ -4,7 +4,7 @@ window.onload = function() {
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set(["P_ZEa2Sugqm-OU"])  // This breaks because of caching.
+    var visible = new Set(["P_eJolyx6ifX0A"])  // This breaks because of caching.
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -354,7 +354,7 @@ window.onload = function() {
     let setDefaultOption = function(element, id, text) {
         if (element.find("option[value='" + id + "']").length) {
             element.val(id).trigger('change');
-        } else {
+        } else if (text != null) {
             var newOption = new Option(text, id, true, true);
             element.append(newOption).trigger('change');
         }
@@ -381,8 +381,8 @@ window.onload = function() {
         let marriageText = await getMarriageDescription(person.parents)
         setDefaultOption(modal.find('.parents-typeahead'), person.parents, marriageText)
 
+        $("#partners-table > tbody").empty()
         person.marriages.forEach(async m => {
-            $("#partners-table > tbody").empty()
             let element = addPartnerRow()
             marriage = getMarriage(m)
             partner = await fetchPerson(marriage.partners.filter(p => p != person.id)[0])
@@ -452,6 +452,8 @@ window.onload = function() {
     make_marriage_typeahead = function(element) {
         element.select2({
             minimumInputLength: 2,
+            allowClear: true,
+            placeholder: "Find a couple",
             ajax: {
                 method: "POST",
                 url: url,

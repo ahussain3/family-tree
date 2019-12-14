@@ -177,6 +177,7 @@ def mutate_upsert_person(
 ):
     marriages = marriages or []
 
+    # PERSONAL DETAILS
     if id is None:
         person = database.add_person(
             name=name,
@@ -197,18 +198,21 @@ def mutate_upsert_person(
             biography=biography
         )
 
-    if parents is not None:
+    # PARENTS
+    if parents is None:
+        database.delete_parents(person)
+    else:
         database.set_parents(parents, person)
 
-    # for marriage in marriages:
-    #     partner_a = database.get_node(marriage.partner_a_id)
-    #     partner_b = database.get_node(marriage.partner_b_id)
-    #     children = [database.get_node(child_id) for child_id in marriage.children]
+    # MARRIAGES
+    database.delete_marriages(person)  # this seems dangerous?
 
-    #     if database.is_married(partner_a, partner_b):
-    #         database.set_children(partner_a, partner_b, children)
-    #     else:
-    #         database.add_marriage(partner_a, partner_b, children)
+    for marriage in marriages:
+        partner_a = database.get_node(marriage.partner_a_id)
+        partner_b = database.get_node(marriage.partner_b_id)
+        children = [database.get_node(child_id) for child_id in marriage.children]
+
+        database.add_marriage(partner_a, partner_b, children)
 
     return UpsertPerson(person=mk_person(person))
 
