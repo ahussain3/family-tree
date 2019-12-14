@@ -12,22 +12,30 @@ body {
 }
 
 /* SEARCH INPUT BAR */
-#search-bar {
+#search-bar-typeahead {
     font-family: sans-serif;
     position: relative;
 }
-.twitter-typeahead {
-    display: block;
-}
-.typeahead, .tt-query, .tt-hint {
+#search-bar-typeahead {
+    font-size: 22px; /* Set input font size */
+    margin: 10px auto;
     border: none;
     border-bottom: 2px solid black;
-    font-size: 22px; /* Set input font size */
+}
+#search-bar-typeahead > span > input.typeahead.tt-query.tt-input {
+    border: none;
+    border-bottom: 1px solid black;
+}
+.twitter-typeahead {
+    display: block;
+    width: 100%;
+}
+.typeahead, .tt-query, .tt-hint {
+    height: 30px;
     line-height: 30px;
+    outline: medium none;
     padding: 8px 12px;
-    width: 500px;
-    margin: 10px auto;
-    outline: none;
+    width: 100%;
 }
 .typeahead {
     background-color: #FFFFFF;
@@ -41,8 +49,9 @@ body {
 .tt-menu {
     background-color: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-    margin-top: 0px;
+    margin-top: 12px;
     padding: 8px 0;
     width: 422px;
 }
@@ -58,7 +67,6 @@ body {
 .tt-suggestion p {
     margin: 0;
 }
-
 
 /* MAIN CANVAS */
 div#container {
@@ -120,4 +128,13 @@ div.modal-header {
     height: 300px;
     background-size: cover;
     background-position: center;
+}
+
+div.modal-dialog {
+    background-color: white;
+    border-radius: 5px;
+}
+
+p.modal-bio {
+    text-align: center;
 }

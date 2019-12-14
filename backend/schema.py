@@ -50,32 +50,27 @@ class Marriage(gql.ObjectType):
     partners = gql.List(lambda: Person)
     children = gql.List(lambda: Person)
 
-class AddPerson(gql.Mutation):
+class MarriageInput(gql.InputObjectType):
+    partner_a_id = gql.String(required=True)
+    partner_b_id = gql.String(required=True)
+    children = gql.List(gql.String)
+
+class UpsertPerson(gql.Mutation):
     class Arguments:
-        name = gql.String(required=True)
-        gender = GenderType(required=True)
-        residence = gql.String()
-        birth_year = gql.Int()
-        death_year = gql.Int()
-
-    person = gql.Field(Person, required=True)
-
-    def mutate(self, info, **user_args):
-        return mutate_add_person(info, **user_args)
-
-class UpdatePerson(gql.Mutation):
-    class Arguments:
-        id = gql.ID(required=True)
+        id = gql.ID()
         name = gql.String()
         gender = GenderType()
         residence = gql.String()
         birth_year = gql.Int()
         death_year = gql.Int()
+        biography = gql.String()
+        parents = gql.String()
+        marriages = gql.List(MarriageInput)
 
     person = gql.Field(Person, required=True)
 
     def mutate(self, info, **user_args):
-        return mutate_update_person(info, **user_args)
+        return mutate_upsert_person(info, **user_args)
 
 class AddMarriage(gql.Mutation):
     class Arguments:
@@ -91,8 +86,8 @@ class AddMarriage(gql.Mutation):
 
 class AddChildren(gql.Mutation):
     class Arguments:
-        parent_ids = gql.List(gql.ID, required=True)
-        child_id = gql.ID(required=True)
+        marriage_id = gql.ID(required=True)
+        children_ids = gql.List(gql.ID, required=True)
 
     children = gql.Field(gql.List(Person), required=True)
 
@@ -103,13 +98,12 @@ class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
     person = gql.Field(Person, id=gql.ID())
     search_persons = gql.Field(gql.List(Person), name=gql.String())
+    search_marriages = gql.Field(gql.List(Marriage), name=gql.String())
 
 class Mutation(gql.ObjectType):
-    add_person = AddPerson.Field(required=True)
-    update_person = UpdatePerson.Field(required=True)
+    upsert_person = UpsertPerson.Field(required=True)
     add_marriage = AddMarriage.Field(required=True)
-    add_child = AddChildren.Field(required=True)
-
+    add_children = AddChildren.Field(required=True)
 
 # Resolvers
 @resolver_for(Query, "person")
@@ -121,6 +115,15 @@ def query_person(self, info, *, id):
 def query_search_persons(self, info, *, name):
     persons = database.search_persons(name)
     return [mk_person(person) for person in persons]
+
+@resolver_for(Query, "search_marriages")
+def query_search_marriages(self, info, *, name):
+    persons = database.search_persons(name)
+    result = []
+    for person in persons:
+        partners = database.get_partners(person['opaque_id'])
+        result = result + [mk_marriage(mk_person(person), mk_person(partner)) for partner in partners]
+    return result
 
 @resolver_for(Person, "parents")
 def person_parents(self, info):
@@ -160,51 +163,59 @@ def marriage_children(self, info):
     return sorted(children, key=lambda child: child.birth_year)
 
 # Mutators
-def mutate_add_person(info, *, name, gender, residence=None, birth_year=None, death_year=None):
-    result = database.add_person(
-        name=name,
-        gender=gender,
-        residence=residence,
-        birth_year=birth_year,
-        death_year=death_year,
-    )
-    return AddPerson(person=mk_person(result))
+def mutate_upsert_person(
+    info, *,
+    id=None,
+    name=None,
+    gender=None,
+    residence=None,
+    birth_year=None,
+    death_year=None,
+    biography=None,
+    parents=None,
+    marriages=None,
+):
+    marriages = marriages or []
 
-def mutate_update_person(info, *, id, name=None, gender=None, residence=None, birth_year=None, death_year=None):
-    args = locals().copy()
-    args.pop("info", None)
-    person = database.update_person(**args)
-    return UpdatePerson(person=mk_person(person))
+    # PERSONAL DETAILS
+    if id is None:
+        person = database.add_person(
+            name=name,
+            gender=gender,
+            residence=residence,
+            birth_year=birth_year,
+            death_year=death_year,
+            biography=biography,
+        )
+    else:
+        person = database.update_person(
+            id=id,
+            name=name,
+            gender=gender,
+            residence=residence,
+            birth_year=birth_year,
+            death_year=death_year,
+            biography=biography
+        )
 
-def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, end_year=None):
-    partner_a = database.get_node(partner_a_id)
-    partner_b = database.get_node(partner_b_id)
+    # PARENTS
+    if parents is None:
+        database.delete_parents(person)
+    else:
+        database.set_parents(parents, person)
 
-    result = database.add_marriage(
-        person_a=partner_a,
-        person_b=partner_b,
-        start_year=start_year,
-        end_year=end_year,
-    )
-    partner_a, partner_b = (mk_person(person) for person in result)
+    # MARRIAGES
+    database.delete_marriages(person)  # this seems dangerous?
 
-    return AddMarriage(marriage=mk_marriage(partner_a, partner_b))
+    for marriage in marriages:
+        partner_a = database.get_node(marriage.partner_a_id)
+        partner_b = database.get_node(marriage.partner_b_id)
+        children = [database.get_node(child_id) for child_id in marriage.children]
 
-def mutate_add_children(info, *, marriage_id, children_ids):
-    children = [database.get_node(child_id) for child_id in children_ids]
-    parent_ids = marriage_id.split("+")
+        database.add_marriage(partner_a, partner_b, children)
 
-    for parent_id in parent_ids:
-        assert child_id != parent_id, "A person cannot be their own child"
+    return UpsertPerson(person=mk_person(person))
 
-        parent = database.get_node(parent_id)
-        for child in children:
-            database.add_child(
-                parent=parent,
-                child=child
-            )
 
-    return AddChildren(children=[mk_person(child) for child in children])
 
 schema = gql.Schema(query=Query, mutation=Mutation)
-

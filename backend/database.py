@@ -43,22 +43,29 @@ def get_node(opaque_id):
 
     return result.first()
 
-def get_relationship(opaque_id, rel_type):
+def get_relationship(nodes, rel_type):
+    matcher = RelationshipMatcher(graph)
+    return matcher.match(nodes, rel_type).first()
+
+def get_relationships(opaque_id, rel_type):
     person = get_node(opaque_id)
     matcher = RelationshipMatcher(graph)
     return [p.end_node for p in matcher.match([person], rel_type)]
 
 def get_parents(opaque_id):
-    result = get_relationship(opaque_id, RelationshipType.PARENT.value)
+    result = get_relationships(opaque_id, RelationshipType.PARENT.value)
     return sorted(result, key=lambda p: p["gender"], reverse=True)
 
 def get_children(opaque_id):
-    result = get_relationship(opaque_id, RelationshipType.CHILD.value)
-    return sorted(result, key=lambda p: p["birth_year"])
+    result = get_relationships(opaque_id, RelationshipType.CHILD.value)
+    return sorted(result, key=lambda p: p["birth_year"] or 0)
 
 def get_partners(opaque_id):
-    result = get_relationship(opaque_id, RelationshipType.PARTNER.value)
-    return sorted(result, key=lambda p: p["birth_year"])
+    result = get_relationships(opaque_id, RelationshipType.PARTNER.value)
+    return sorted(result, key=lambda p: p["birth_year"] or 0)
+
+def is_married(person_a, person_b):
+    return get_relationship([person_a, person_b], RelationshipType.PARTNER.value) is not None
 
 def search_persons(name):
     matcher = NodeMatcher(graph)
@@ -66,7 +73,7 @@ def search_persons(name):
     return list(result)
 
 # Create new entries
-def add_person(name, gender, *, residence, birth_year, death_year):
+def add_person(name, gender, *, residence, birth_year, death_year, biography):
     person = Node(NodeType.PERSON.value, opaque_id=make_opaque_id("P"), **locals())
     graph.create(person)
     return person
@@ -77,12 +84,48 @@ def update_person(id, **kwargs):
     graph.push(person)
     return person
 
-def add_marriage(person_a, person_b, *, start_year, end_year):
-    rel_a = Relationship(person_a, RelationshipType.PARTNER.value, person_b, start_year=start_year, end_year=end_year)
-    rel_b = Relationship(person_b, RelationshipType.PARTNER.value, person_a, start_year=start_year, end_year=end_year)
+def delete_parents(child):
+    for parent in get_parents(child["opaque_id"]):
+        graph.separate(get_relationship([child, parent], RelationshipType.PARENT.value))
+        graph.separate(get_relationship([parent, child], RelationshipType.CHILD.value))
 
-    graph.create(rel_a)
-    graph.create(rel_b)
+def set_parents(marriage_id, child):
+    parent_ids = marriage_id.split("+")
+    delete_parents(child)
+
+    for parent_id in parent_ids:
+        parent = get_node(parent_id)
+        add_child(parent, child)
+
+
+def delete_children(person_a, person_b):
+    a_children = get_children(person_a["opaque_id"])
+    b_children = get_children(person_b["opaque_id"])
+
+    children = [child for child in a_children if child in b_children]
+
+    for child in children:
+        delete_parents(child)
+
+def delete_marriages(person):
+    for partner in get_partners(person["opaque_id"]):
+        graph.separate(get_relationship([person, partner], RelationshipType.PARTNER.value))
+        graph.separate(get_relationship([partner, person], RelationshipType.PARTNER.value))
+        delete_children(person, partner)
+
+def add_marriage(person_a, person_b, children):
+    if not is_married(person_a, person_b):
+        rel_a=Relationship(person_a, RelationshipType.PARTNER.value, person_b)
+        rel_b=Relationship(person_b, RelationshipType.PARTNER.value, person_a)
+
+        graph.create(rel_a)
+        graph.create(rel_b)
+
+    delete_children(person_a, person_b)
+
+    for child in children:
+        add_child(person_a, child)
+        add_child(person_b, child)
 
     return (person_a, person_b)
 

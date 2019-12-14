@@ -4,7 +4,7 @@ window.onload = function() {
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set([])  // This breaks because of caching.
+    var visible = new Set(["P_eJolyx6ifX0A"])  // This breaks because of caching.
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -50,7 +50,7 @@ window.onload = function() {
         let link = createLink(id, name, async () => {
             let result = await func(id)
             await result.reduce(
-                (p, id) => p.then(() => addPerson(id).then(() => render())),
+                (p, id) => p.then(() => showPerson(id).then(() => render())),
                 Promise.resolve(null)
             );
         })
@@ -66,22 +66,6 @@ window.onload = function() {
     }
 
     const toTitleCase = s => s.substr(0, 1).toUpperCase() + s.substr(1).toLowerCase();
-
-    let showModal = async function(id) {
-        let person = await fetchPerson(id)
-        let modal = $('#exampleModal')
-
-        let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
-
-        // name, residence, birth/death year, bio
-        modal.find(".modal-title").text(person.name)
-        modal.find(".modal-residence").text(person.residence)
-        modal.find(".modal-birth").text(birthString)
-        modal.find(".modal-bio").text(person.biography)
-
-        modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
-        modal.modal()
-    }
 
     let renderPerson = function(id, x, y) {
         let person = data[id]
@@ -99,10 +83,13 @@ window.onload = function() {
 
         let link = createLink(id, "Details", () => {
             showModal(id)
+            // showEditModal(id)
         })
         container.append(link)
 
-        container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
+        if (visible.size > 1) {
+            container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
+        }
 
         canvas.append(container)
 
@@ -217,14 +204,15 @@ window.onload = function() {
         }
     }
 
-    let main = function() {
+    let main = async function() {
+        await Promise.all([...visible].map(id => fetchPerson(id)))
         render()
     }
 
     main()
 
     // Find the shortest path from the node identified by 'source' and any visible node
-    // If there are multiple shortests paths of the same length, it arbitrarily
+    // If there are multiple shortest paths of the same length, it arbitrarily
     // returns one of the shortest paths
     // Returns: list of ids of all nodes that are on a shortest path, including
     // the already visible node, but not including the source node.
@@ -283,7 +271,7 @@ window.onload = function() {
     }
 
     // INTERACTION
-    let addPerson = async function(id) {
+    let showPerson = async function(id) {
         // calculate shortest path from this person to another node that is already visible
         await shortestPath(id, visible).then(result => {
             result.concat(id).forEach(item => {
@@ -307,30 +295,10 @@ window.onload = function() {
         render()
     }
 
-    let handleChangeFocus = function(event, value) {
-        changeFocus(_.sample(Array.from(visible)))
-    }
-
-    let handleRandomPerson = function(event, value) {
-        let id = _.sample(_.difference(people, Array.from(visible)))
-        console.log(id)
-        if (id == null) { return }
-
-        addPerson(id).then(() => render()).then(() => changeFocus(id))
-    }
-
-    $('#search-bar input.typeahead').typeahead({
-        hint: true,
-        highlight: true, /* Enable substring highlighting */
-        minLength: 1 /* Specify minimum characters required for showing result */
-    },
-    {
-        name: 'searchPersons',
-        source: searchPersons,
-        display: "name",
-    });
-
     let changeFocus = function(id) {
+        if (focusedId == id) {
+            return
+        }
         focusedId = id
         render()
         let focused = document.getElementById(focusedId)
@@ -339,15 +307,219 @@ window.onload = function() {
 
     let selectPerson = function(event, person) {
       fetchPerson(person.id).then(result => {
-        addPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
-        setTimeout(() => $('#search-bar input.typeahead.tt-input').val(""), 10)
+        showPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
+        setTimeout(() => $('#search-bar-typeahead input.typeahead.tt-input').val(""), 10)
       })
     }
 
-    $('#search-bar input.typeahead.tt-input').bind('typeahead:select', selectPerson);
+    let handleCreatePerson = () => {
+        showEditModal(null)
+    }
+
+    let showModal = async function(id) {
+        let modal = $('#detailModal')
+        if (id == null) {
+            return
+        }
+
+        changeFocus(id)
+        let person = await fetchPerson(id)
+        let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
+
+        // name, residence, birth/death year, bio
+        modal.find("#id").text(id)
+        modal.find(".modal-title").text(person.name)
+        modal.find(".modal-residence").text(person.residence)
+        modal.find(".modal-birth").text(birthString)
+        modal.find(".modal-bio").text(person.biography || "No bio has been provided yet for this person.")
+        modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
+
+        modal.modal()
+    }
+
+    let setDefaultOption = function(element, id, text) {
+        if (element.find("option[value='" + id + "']").length) {
+            element.val(id).trigger('change');
+        } else if (text != null) {
+            var newOption = new Option(text, id, true, true);
+            element.append(newOption).trigger('change');
+        }
+    }
+
+    let handleEditPerson = function() {
+        let id = $('#detailModal').find("#id").text()
+        showEditModal(id)
+    }
+
+    let showEditModal = async function(id) {
+        let modal = $('#editModal')
+
+        if (id == null) {
+            document.getElementById("edit-person-form").reset()
+            $("#partners-table > tbody").empty()
+            modal.modal()
+            return
+        }
+
+        let person = await fetchPerson(id)
+
+        modal.find('#id').val(id)
+        modal.find('#name').val(person.name)
+        modal.find('#residence').val(person.residence)
+        modal.find('#gender').val(person.gender)
+        modal.find('#birth-year').val(person.birthYear)
+        modal.find('#death-year').val(person.deathYear)
+        modal.find('#biography').val(person.biography)
+
+        let marriageText = await getMarriageDescription(person.parents)
+        setDefaultOption(modal.find('.parents-typeahead'), person.parents, marriageText)
+
+        $("#partners-table > tbody").empty()
+        person.marriages.forEach(async m => {
+            let element = addPartnerRow()
+            marriage = getMarriage(m)
+            partner = await fetchPerson(marriage.partners.filter(p => p != person.id)[0])
+            children = await Promise.all(marriage.children.map(c => fetchPerson(c)))
+
+            setDefaultOption(element.find('.partner-typeahead'), partner.id, partner.name)
+            children.forEach(child => {
+                setDefaultOption(element.find('.children-typeahead'), child.id, child.name)
+            })
+        })
+
+        make_person_typeahead($(".partner-typeahead"))
+        make_person_typeahead($(".children-typeahead"))
+
+        modal.modal()
+    }
+
+    let initTypeahead = function(id, source, handler, display) {
+        $(id + ' input.typeahead').typeahead({
+                hint: true,
+                highlight: true, /* Enable substring highlighting */
+                minLength: 1 /* Specify minimum characters required for showing result */
+            },
+            {
+                name: 'searchPersons',
+                source: source,
+                display: display || "name",
+            });
+
+        $(id + ' input.typeahead.tt-input').bind('typeahead:select', handler);
+    }
+
+    initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
 
 
-    document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
-    document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
+// Modal pop up (I really need this to be its own component
+
+    let make_person_typeahead = function(element) {
+        element.select2({
+          minimumInputLength: 2,
+          ajax: {
+            method: "POST",
+            url: url,
+            headers: {},
+            contentType: "application/json",
+            data: function(params) {
+                return JSON.stringify({
+                    query: searchPersonsQuery,
+                    variables: {"name": params.term}
+                })
+            },
+            processResults: function (data) {
+                if (data === undefined) {
+                    return null
+                }
+                return {
+                    "results": data["data"]["searchPersons"].map(p => {
+                        return {"id": p.id, "text": p.name}
+                    })
+                }
+            }
+          }
+        });
+    }
+
+    make_marriage_typeahead = function(element) {
+        element.select2({
+            minimumInputLength: 2,
+            allowClear: true,
+            placeholder: "Find people...",
+            ajax: {
+                method: "POST",
+                url: url,
+                headers: {},
+                contentType: "application/json",
+                data: function(params) {
+                    return JSON.stringify({
+                        query: searchMarriagesQuery,
+                        variables: {"name": params.term}
+                    })
+                },
+                processResults: function(data) {
+                    return {
+                        "results": data["data"]["searchMarriages"].map(m => {
+                            return {"id": m.id, "text": m.partners.map((p) => p.name).join(" and ")}
+                        })
+                    }
+                }
+            }
+        })
+    }
+
+    make_marriage_typeahead($(".parents-typeahead"))
+    make_person_typeahead($(".partner-typeahead"))
+    make_person_typeahead($(".children-typeahead"))
+
+    let addPartnerRow = function() {
+        console.log("add row")
+        newRow=`<tr>
+        <td><select class="partner-typeahead" id="partner" style="width: 100%"></select></td>
+        <td><select class="children-typeahead" id="children" multiple="multiple" style="width: 120%"></select></td>
+        <td><input type="button" class="ibtnDel btn btn-md btn-danger "value="X"></td>
+        </tr>`
+        element = $(newRow)
+        $("#partners-table > tbody").append(element)
+        make_person_typeahead($(".partner-typeahead"))
+        make_person_typeahead($(".children-typeahead"))
+        return element
+    }
+
+    $("#addrow").on("click", addPartnerRow)
+
+    $("table.order-list").on("click", ".ibtnDel", function (event) {
+        $(this).closest("tr").remove();
+    });
+
+    let submitEditPerson = async () => {
+        console.log("submitCreatePerson() called")
+        let form = document.querySelector("#edit-person-form")
+        let id = form["id"].value || null
+        let name = form["name"].value
+        let gender = form["gender"].value
+        let birthYear = form["birth-year"].value
+        let deathYear = form["death-year"].value
+        let residence = form["residence"].value
+        let biography = form["biography"].value
+        let parents = form["parents"].value
+
+        marriages = []
+        $('#partners-table tbody tr').each((i, row) => {
+            partner = $(row).find(".partner-typeahead").select2("data")[0]
+            children = $(row).find(".children-typeahead").select2("data")
+            marriages.push({partnerAId: id, partnerBId: partner.id, children: children.map(c => c.id)})
+        })
+
+        upsertPerson(
+            id, name, gender, birthYear, deathYear, residence, biography, parents, marriages
+        )
+
+        render()
+    }
+
     document.querySelector('#reset-btn').addEventListener("click", reset)
+    document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
+    document.querySelector("#submit-edit-form-btn").addEventListener("click", submitEditPerson)
+    document.querySelector('#show-edit-modal').addEventListener("click", handleEditPerson)
 };

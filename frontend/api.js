@@ -1,4 +1,4 @@
-let url = "http://localhost:5000/graphql"
+let url = "http://localhost:5008/graphql"
 var graph = graphql(url, {
   method: "POST", // POST by default.
   headers: {},
@@ -6,7 +6,7 @@ var graph = graphql(url, {
 })
 
 let searchPersonsQuery = `query searchPersonsQuery($name: String) {
-  searchPersons(name: $name)  {
+  searchPersons(name: $name) {
     id
     name
   }
@@ -54,11 +54,22 @@ let personQuery = `query personQuery($id: ID) {
 
 var data = {}
 
+let clearData = function() {
+  data = {}
+}
+
 let addPersonToDataset = function(person) {
   var clone = Object.assign({}, person)
   clone.marriages = person.marriages.map(marriage => marriage.id)
   clone.parents = person.parents != null ? person.parents.id : null
+
+  person.marriages.forEach(marriage => addMarriageToDataset(marriage))
+  if (person.parents) {
+    addMarriageToDataset(person.parents)
+  }
+
   data[person.id] = clone
+  return clone
 }
 
 let addMarriageToDataset = function(marriage) {
@@ -68,16 +79,11 @@ let addMarriageToDataset = function(marriage) {
   data[marriage.id] = clone
 }
 
-let _fetchPerson = async function (id, cb) {
+let _fetchPerson = async function (id) {
   let variables = {"id": id}
   return graph(personQuery)(variables).then((response) => {
     let result = response["person"]
-    addPersonToDataset(result)
-    result.marriages.forEach(marriage => addMarriageToDataset(marriage))
-    if (result.parents) {
-      addMarriageToDataset(result.parents)
-    }
-    cb(result)
+    return addPersonToDataset(result)
   }).catch(function (error) {
     console.log(error)
   })
@@ -85,8 +91,122 @@ let _fetchPerson = async function (id, cb) {
 
 let fetchPerson = async (id) => {
     if (!Object.keys(this.data).includes(id)) {
-        await _fetchPerson(id, () => {})
+        await _fetchPerson(id)
         return this.data[id]
     }
     return this.data[id]
+}
+
+let getMarriage = (id) => {
+    marriage = data[id]
+    if (marriage == undefined) {
+      return null
+    }
+    return marriage
+}
+
+
+let getMarriageDescription = async (id) => {
+    marriage = data[id]
+    if (marriage == undefined) {
+      return null
+    }
+    const partners = await Promise.all(marriage.partners.map(p => fetchPerson(p)))
+    return partners.map(p => p.name).join(" and ")
+}
+
+// TODO(Awais): I should really have fragments or something here
+let upsertPersonMutation = `mutation upsertPersonMutation(
+  $id: ID,
+  $name: String!,
+  $gender: Gender!,
+  $birthYear: Int,
+  $deathYear: Int,
+  $residence: String,
+  $biography: String,
+  $parents: String,
+  $marriages: [MarriageInput],
+) {
+  upsertPerson(
+    id: $id,
+    name: $name,
+    gender: $gender,
+    birthYear: $birthYear,
+    deathYear: $deathYear,
+    residence: $residence,
+    biography: $biography,
+    parents: $parents,
+    marriages: $marriages
+  ) {
+    person {
+      __typename
+      id
+      name
+      gender
+      photoUrl
+      residence
+      birthYear
+      deathYear
+      biography
+      parents {
+        __typename
+        id
+        startYear
+        endYear
+        partners { id }
+        children { id }
+      }
+      marriages {
+        __typename
+        id
+        startYear
+        endYear
+        partners { id }
+        children { id }
+      }
+    }
+  }
+}`
+
+let upsertPerson = async function(id, name, gender, birthYear, deathYear, residence, biography, parents, marriages) {
+  let variables = {
+    "id": id,
+    "name": name,
+    "gender": gender,
+    "birthYear": birthYear || null,
+    "deathYear": deathYear || null,
+    "residence": residence || null,
+    "biography": biography || null,
+    "parents": parents || null,
+    "marriages": marriages || null,
+  }
+  return graph(upsertPersonMutation)(variables).then((response) => {
+    let result = response["upsertPerson"]["person"]
+    return addPersonToDataset(result)
+  }).catch(function (error) {
+    console.log(error)
+  })
+}
+
+let searchMarriagesQuery = `query searchMarriagesQuery($name: String) {
+  searchMarriages(name: $name)  {
+    id
+    partners {
+      id
+      name
+    }
+  }
+}`
+
+let searchMarriages = function(query, sync, async) {
+  let variables = {"name": query}
+  graph(searchMarriagesQuery)(variables).then(function (response) {
+    let result = response["searchMarriages"]
+    result.forEach((marriage) => {
+      marriage["partnerNames"] = marriage.partners.map((partner) => partner.name).join(" and ")
+    })
+    async(result)
+  }).catch(function (error) {
+    console.log(error)
+  })
 }
