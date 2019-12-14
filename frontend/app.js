@@ -305,6 +305,9 @@ window.onload = function() {
     }
 
     let changeFocus = function(id) {
+        if (focusedId == id) {
+            return
+        }
         focusedId = id
         render()
         let focused = document.getElementById(focusedId)
@@ -322,16 +325,7 @@ window.onload = function() {
         showEditModal(null)
     }
 
-    let setParents = async function(event, marriage) {
-        debugger
-        // how do I get a self id if the person hasn't been created yet?
-        // alternatively, how I can enforce that an id exists by this point?
-        // I can pass a marriage id in to the create user function
-        // Then I will have a fresh problem when I get to marriages and children
-        // addChildren(marriage.id, )
-    }
-
-        let showModal = async function(id) {
+    let showModal = async function(id) {
         let modal = $('#detailModal')
         if (id == null) {
             modal.modal()
@@ -368,6 +362,7 @@ window.onload = function() {
             return
         }
 
+        changeFocus(id)
         let person = await fetchPerson(id)
 
         modal.find('#id').val(id)
@@ -397,7 +392,6 @@ window.onload = function() {
         make_person_typeahead($(".partner-typeahead"))
         make_person_typeahead($(".children-typeahead"))
 
-        // let child = await fetchPerson(person.)
         modal.modal()
     }
 
@@ -453,7 +447,7 @@ window.onload = function() {
         element.select2({
             minimumInputLength: 2,
             allowClear: true,
-            placeholder: "Find a couple",
+            placeholder: "Find people...",
             ajax: {
                 method: "POST",
                 url: url,
@@ -522,11 +516,13 @@ window.onload = function() {
         upsertPerson(
             id, name, gender, birthYear, deathYear, residence, biography, parents, marriages
         )
+
+        render()
     }
 
     document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
     document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)
     document.querySelector('#reset-btn').addEventListener("click", reset)
     document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
-    document.querySelector("#edit-person-form").addEventListener("submit", submitEditPerson)
+    document.querySelector("#submit-edit-form-btn").addEventListener("click", submitEditPerson)
 };

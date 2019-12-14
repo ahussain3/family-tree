@@ -110,6 +110,7 @@ def delete_children(person_a, person_b):
 def delete_marriages(person):
     for partner in get_partners(person["opaque_id"]):
         graph.separate(get_relationship([person, partner], RelationshipType.PARTNER.value))
+        graph.separate(get_relationship([partner, person], RelationshipType.PARTNER.value))
         delete_children(person, partner)
 
 def add_marriage(person_a, person_b, children):

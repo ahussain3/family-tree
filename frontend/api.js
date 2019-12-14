@@ -54,6 +54,10 @@ let personQuery = `query personQuery($id: ID) {
 
 var data = {}
 
+let clearData = function() {
+  data = {}
+}
+
 let addPersonToDataset = function(person) {
   var clone = Object.assign({}, person)
   clone.marriages = person.marriages.map(marriage => marriage.id)
@@ -99,9 +103,6 @@ let getMarriage = (id) => {
       return null
     }
     return marriage
-    // const partners = await Promise.all(marriage.partners.map(p => fetchPerson(p)))
-    // const children = await Promise.all(marriage.children.map(c => fetchPerson(c)))
-    // return partners.map(p => p.name).join(" and ")
 }
 
 
@@ -205,36 +206,6 @@ let searchMarriages = function(query, sync, async) {
       marriage["partnerNames"] = marriage.partners.map((partner) => partner.name).join(" and ")
     })
     async(result)
-  }).catch(function (error) {
-    console.log(error)
-  })
-}
-
-let addChildrenMutation = `mutation addChildrenMutation(
-  $marriageId: ID!,
-  $childrenIds: [ID],
-) {
-  addChildren(
-    marriageId: $marriageId,
-    childrenIds: $childrenIds,
-  ) {
-    children {
-      id
-      name
-    }
-  }
-}`
-
-
-let addChildren = async function(marriage_id, children_ids) {
-  let variables = {
-    "marriageId": marriage_id,
-    "childrenIds": children_ids,
-  }
-  return graph(addChildrenMutation)(variables).then((response) => {
-    let result = response["addChildren"]
-    debugger
-    return result
   }).catch(function (error) {
     console.log(error)
   })
