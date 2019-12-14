@@ -87,7 +87,9 @@ window.onload = function() {
         })
         container.append(link)
 
-        container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
+        if (visible.size > 1) {
+            container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
+        }
 
         canvas.append(container)
 
@@ -320,6 +322,7 @@ window.onload = function() {
             return
         }
 
+        changeFocus(id)
         let person = await fetchPerson(id)
         let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
 
@@ -358,7 +361,6 @@ window.onload = function() {
             return
         }
 
-        changeFocus(id)
         let person = await fetchPerson(id)
 
         modal.find('#id').val(id)
