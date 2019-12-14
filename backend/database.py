@@ -58,11 +58,11 @@ def get_parents(opaque_id):
 
 def get_children(opaque_id):
     result = get_relationships(opaque_id, RelationshipType.CHILD.value)
-    return sorted(result, key=lambda p: p["birth_year"])
+    return sorted(result, key=lambda p: p["birth_year"] or 0)
 
 def get_partners(opaque_id):
     result = get_relationships(opaque_id, RelationshipType.PARTNER.value)
-    return sorted(result, key=lambda p: p["birth_year"])
+    return sorted(result, key=lambda p: p["birth_year"] or 0)
 
 def is_married(person_a, person_b):
     return get_relationship([person_a, person_b], RelationshipType.PARTNER.value) is not None

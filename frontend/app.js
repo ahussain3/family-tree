@@ -319,7 +319,7 @@ window.onload = function() {
     }
 
     let handleCreatePerson = () => {
-        showModal(null)
+        showEditModal(null)
     }
 
     let setParents = async function(event, marriage) {
@@ -503,7 +503,7 @@ window.onload = function() {
     let submitEditPerson = async () => {
         console.log("submitCreatePerson() called")
         let form = document.querySelector("#edit-person-form")
-        let id = form["id"].value
+        let id = form["id"].value || null
         let name = form["name"].value
         let gender = form["gender"].value
         let birthYear = form["birth-year"].value
@@ -523,21 +523,6 @@ window.onload = function() {
             id, name, gender, birthYear, deathYear, residence, biography, parents, marriages
         )
     }
-
-
-    // let submitCreatePerson = async () => {
-    //     console.log("submitCreatePerson() called")
-    //     let form = document.querySelector("#create-person-form")
-    //     debugger
-    //     result = await upsertPerson(
-    //         form["name"].value,
-    //         form["gender"].value,
-    //         form["birth-year"].value,
-    //         form["death-year"].value,
-    //         form["residence"].value,
-    //         form["biography"].value,
-    //     )
-    // }
 
     document.querySelector("#tick-btn").addEventListener("click", handleRandomPerson)
     document.querySelector("#focus-btn").addEventListener("click", handleChangeFocus)

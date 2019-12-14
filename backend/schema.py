@@ -216,38 +216,6 @@ def mutate_upsert_person(
 
     return UpsertPerson(person=mk_person(person))
 
-# def mutate_add_marriage(info, *, partner_a_id, partner_b_id, start_year=None, end_year=None):
-#     partner_a = database.get_node(partner_a_id)
-#     partner_b = database.get_node(partner_b_id)
 
-#     result = database.add_marriage(
-#         person_a=partner_a,
-#         person_b=partner_b,
-#         start_year=start_year,
-#         end_year=end_year,
-#     )
-#     partner_a, partner_b = (mk_person(person) for person in result)
-
-#     return AddMarriage(marriage=mk_marriage(partner_a, partner_b))
-
-
-# def mutate_add_children(info, *, marriage_id, children_ids):
-#     children = [database.get_node(child_id) for child_id in children_ids]
-#     parent_ids = marriage_id.split("+")
-
-#     for child in children:
-#         database.delete_parents(child)
-
-#         for parent_id in parent_ids:
-#             parent = database.get_node(parent_id)
-#             assert child["opaque_id"] != parent_id, "A person cannot be their own child"
-
-#             database.add_child(
-#                 parent=parent,
-#                 child=child
-#             )
-
-#     return AddChildren(children=[mk_person(child) for child in children])
 
 schema = gql.Schema(query=Query, mutation=Mutation)
-
