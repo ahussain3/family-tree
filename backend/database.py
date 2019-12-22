@@ -1,10 +1,15 @@
 import base64
 import secrets
+import os
 from enum import Enum
 
 from py2neo import Node, Graph, Relationship, NodeMatcher, RelationshipMatcher
 
-graph = Graph("bolt://localhost:7687", auth=('neo4j', 'banana01'))
+DB_HOSTNAME = os.environ.get("DB_HOSTNAME", "localhost")
+DB_USER = os.environ.get("DB_USER", "neo4j")
+DB_PASSWD = os.environ.get("DB_PASSWD", "banana01")
+
+graph = Graph(f"bolt://{DB_HOSTNAME}:7687", auth=(DB_USER, DB_PASSWD))
 
 # Node Types
 class NodeType(Enum):
