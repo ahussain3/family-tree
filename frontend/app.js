@@ -4,7 +4,7 @@ window.onload = function() {
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set(["P_eJolyx6ifX0A"])  // This breaks because of caching.
+    var visible = new Set([])
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
