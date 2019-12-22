@@ -1,5 +1,6 @@
-// let url = "http://localhost:5008/graphql" // local
-let url ="http://35.242.170.73/graphql"  // prod
+let url = "http://localhost:5008/graphql" // local
+// let url ="http://35.242.170.73/graphql"  // prod
+
 var graph = graphql(url, {
   method: "POST", // POST by default.
   headers: {},

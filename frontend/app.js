@@ -508,13 +508,14 @@ window.onload = function() {
         $('#partners-table tbody tr').each((i, row) => {
             partner = $(row).find(".partner-typeahead").select2("data")[0]
             children = $(row).find(".children-typeahead").select2("data")
-            marriages.push({partnerAId: id, partnerBId: partner.id, children: children.map(c => c.id)})
+            marriages.push({partnerBId: partner.id, children: children.map(c => c.id)})
         })
 
-        upsertPerson(
+        let result = await upsertPerson(
             id, name, gender, birthYear, deathYear, residence, biography, parents, marriages
         )
 
+        await showPerson(result['id'])
         render()
     }
 

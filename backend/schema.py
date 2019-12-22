@@ -51,7 +51,6 @@ class Marriage(gql.ObjectType):
     children = gql.List(lambda: Person)
 
 class MarriageInput(gql.InputObjectType):
-    partner_a_id = gql.String(required=True)
     partner_b_id = gql.String(required=True)
     children = gql.List(gql.String)
 
@@ -74,7 +73,6 @@ class UpsertPerson(gql.Mutation):
 
 class AddMarriage(gql.Mutation):
     class Arguments:
-        partner_a_id = gql.ID(required=True)
         partner_b_id = gql.ID(required=True)
         start_year = gql.Int()
         end_year = gql.Int()
@@ -208,7 +206,7 @@ def mutate_upsert_person(
     database.delete_marriages(person)  # this seems dangerous?
 
     for marriage in marriages:
-        partner_a = database.get_node(marriage.partner_a_id)
+        partner_a = person
         partner_b = database.get_node(marriage.partner_b_id)
         children = [database.get_node(child_id) for child_id in marriage.children]
 
