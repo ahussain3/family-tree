@@ -10,11 +10,12 @@ jobs:
     name: Setup Google Cloud
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Setup Google Cloud
-      uses: actions/gcloud/auth@master
-      env:
-        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+    - uses: actions/checkout@v1
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+          version: '270.0.0'
+          service_account_key: ${{ secrets.GCLOUD_AUTH }}
+    - run: gcloud info
     - name: GCP Deploy
       uses: actions/gcloud/cli@master
       env:
