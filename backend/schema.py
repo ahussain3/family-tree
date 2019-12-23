@@ -158,7 +158,7 @@ def marriage_children(self, info):
     # find the intersection of the two lists
     children_b_ids = set(child.id for child in children_b)
     children = [child for child in children_a if child.id in children_b_ids]
-    return sorted(children, key=lambda child: child.birth_year)
+    return sorted(children, key=lambda child: child.birth_year or 0)
 
 # Mutators
 def mutate_upsert_person(

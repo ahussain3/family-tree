@@ -21,7 +21,7 @@
     </head>
     <body>
     <div id="search-bar-typeahead">
-        <input type="text" class="typeahead tt-query" id="search-bar" autocomplete="off" spellcheck="false">
+        <input type="text" class="typeahead tt-query" id="search-bar" autocomplete="off" spellcheck="false" placeholder="Search for a person...">
     </div>
 
     <!-- Detail Modal -->
@@ -60,7 +60,10 @@
                <input type="hidden" id="id" name="id">
               <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Full Name">
+                <input type="text" class="form-control" id="name" placeholder="Full Name" required="">
+                <div class="invalid-feedback">
+                  Please provide a name.
+                </div>
               </div>
               <div class="form-group">
                 <label for="residence">Place of Residence</label>

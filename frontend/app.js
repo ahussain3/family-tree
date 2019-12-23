@@ -324,7 +324,7 @@ window.onload = function() {
 
         changeFocus(id)
         let person = await fetchPerson(id)
-        let birthString = person.birthYear + "-" + (person.deathYear ? person.deathYear : "")
+        let birthString = (person.birthYear ? person.birthYear : "") + "-" + (person.deathYear ? person.deathYear : "")
 
         // name, residence, birth/death year, bio
         modal.find("#id").text(id)
@@ -354,9 +354,12 @@ window.onload = function() {
     let showEditModal = async function(id) {
         let modal = $('#editModal')
 
+        let form = document.querySelector("#edit-person-form")
+        form.reset()
+        form.classList.remove('was-validated')
+        $("#partners-table > tbody").empty()
+
         if (id == null) {
-            document.getElementById("edit-person-form").reset()
-            $("#partners-table > tbody").empty()
             modal.modal()
             return
         }
@@ -374,7 +377,6 @@ window.onload = function() {
         let marriageText = await getMarriageDescription(person.parents)
         setDefaultOption(modal.find('.parents-typeahead'), person.parents, marriageText)
 
-        $("#partners-table > tbody").empty()
         person.marriages.forEach(async m => {
             let element = addPartnerRow()
             marriage = getMarriage(m)
@@ -492,9 +494,17 @@ window.onload = function() {
         $(this).closest("tr").remove();
     });
 
-    let submitEditPerson = async () => {
+    let submitEditPerson = async (event) => {
         console.log("submitCreatePerson() called")
         let form = document.querySelector("#edit-person-form")
+
+        if (form.checkValidity() === false) {
+            event.preventDefault()
+            event.stopPropagation()
+            form.classList.add('was-validated')
+            return
+        }
+
         let id = form["id"].value || null
         let name = form["name"].value
         let gender = form["gender"].value
