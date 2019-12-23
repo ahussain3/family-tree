@@ -15,7 +15,7 @@ jobs:
       uses: actions/gcloud/auth@master
       env:
         GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
-    - name: GCP List Instances
+    - name: GCP Deploy
       uses: actions/gcloud/cli@master
       env:
         CLOUDSDK_CORE_PROJECT:  ${{ secrets.GOOGLE_PROJECT_ID }}
