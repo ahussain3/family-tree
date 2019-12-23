@@ -16,9 +16,4 @@ jobs:
           version: '270.0.0'
           service_account_key: ${{ secrets.GCLOUD_AUTH }}
     - run: gcloud info
-    - name: GCP Deploy
-      uses: actions/gcloud/cli@master
-      env:
-        CLOUDSDK_CORE_PROJECT:  ${{ secrets.GOOGLE_PROJECT_ID }}
-      with:
-        args: compute ssh aw@ft-2 --zone=europe-west2-c --command="~/deploy"
+    - run: gcloud compute ssh aw@ft-2 --zone=europe-west2-c --command="~/deploy"
