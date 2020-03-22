@@ -87,6 +87,16 @@ window.onload = function() {
     const toTitleCase = s => s.substr(0, 1).toUpperCase() + s.substr(1).toLowerCase();
 
     let renderPerson = function(id, x, y) {
+        let birthDeathString = function(birth, death) {
+            if (birth == null && death == null) {
+                return ""
+            }
+            if (death == null) {
+                return `${birth}-`
+            }
+            return `${birth}-${death}`
+        }
+
         let person = data[id]
         var container = document.createElement("div")
         container.className = focusedId == id ? "person focused" : "person"
@@ -95,10 +105,11 @@ window.onload = function() {
 
         container.innerHTML = `
             <div class="profile-pic"></div>
+            <div class="gender-line ${person.gender.toLowerCase()}"></div>
             <div class="content">
                 <h3>${person.name}</h3>
-                <p>${person.birthYear}-${person.deathYear}</p>
-                <p>${person.residence}</p>
+                <p>${birthDeathString(person.birthYear, person.deathYear)}</p>
+                <p>${person.residence || ""}</p>
             </div>
         `
 

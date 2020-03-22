@@ -145,6 +145,18 @@ div.person div.profile-pic {
     border-radius: 5px 5px 0 0;
 }
 
+div.person div.gender-line {
+    height: 6px;
+}
+
+div.person div.male {
+    background-color: #5DADE2;
+}
+
+div.person div.female {
+    background-color: #EC7063;
+}
+
 div.person div.content {
     padding: 10px;
 }
