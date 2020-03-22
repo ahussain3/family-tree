@@ -66,7 +66,6 @@ window.onload = function() {
         div.innerHTML = `<img src='${ICONS[relativeType]}' alt=${label}></img>`
         div.onclick = async (e) => {
             e.stopPropagation()
-            changeFocus(id)
             let result = await func(id)
             await result.reduce(
                 (p, id) => p.then(() => showPerson(id).then(() => render())),
