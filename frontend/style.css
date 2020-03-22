@@ -70,12 +70,27 @@ body {
 
 /* MAIN CANVAS */
 div#container {
-    position: relative;
+    position: absolute;
     height: 100%;
+    width: 100%;
     border: 1px solid blue;
     cursor: all-scroll;
     overflow: hidden;
     background-color: FLORALWHITE;
+}
+
+div#clear-canvas {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 20px;
+    color: FIREBRICK;
+    text-transform: lowercase;
+    cursor: pointer;
+}
+
+div#clear-canvas:hover {
+    font-weight: bold;
 }
 
 div#canvas {

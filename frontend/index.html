@@ -19,6 +19,8 @@
         <script src="./app.js"></script>
     </head>
     <body>
+
+    <!-- Search bar typeahead -->
     <div id="search-bar-typeahead">
         <input type="text" class="typeahead tt-query" id="search-bar" autocomplete="off" spellcheck="false" placeholder="Search for a person...">
     </div>
@@ -48,7 +50,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="11" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -118,10 +119,13 @@
       </div>
     </div>
 
-    <button id="reset-btn">Reset</button>
-<!--     <button id="create-person">Create Person</button> -->
     <div id="container">
         <div id="canvas"></div>
     </div>
+
+    <div id="clear-canvas">
+      <a id="reset-btn">Clear</a>
+    </div>
+
     </body>
 </html>
