@@ -217,6 +217,10 @@ window.onload = function() {
         console.log("APP")
         console.log(visible)
         console.log(data)
+
+        let pl = visible.size > 0 ? "You can keep searching for more people..." : "Start here by searching for a person..."
+        $("#search-bar").attr("placeholder", pl)
+
         cc.update(data, visible)
 
         let x = null

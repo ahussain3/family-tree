@@ -14,13 +14,18 @@ body {
 /* SEARCH INPUT BAR */
 #search-bar-typeahead {
     font-family: sans-serif;
-    position: relative;
-}
-#search-bar-typeahead {
+    position: fixed;
+    width: 500px;
+    top: 100px;
+    left: 50%;
+    margin-left: -250px;
+    z-index: 10;
     font-size: 22px; /* Set input font size */
-    margin: 10px auto;
     border: none;
+    border-radius: 5px;
     border-bottom: 2px solid black;
+    background-color: FLORALWHITE;
+    opacity: 0.8;
 }
 #search-bar-typeahead > span > input.typeahead.tt-query.tt-input {
     border: none;
@@ -38,13 +43,16 @@ body {
     width: 100%;
 }
 .typeahead {
-    background-color: #FFFFFF;
+    opacity: 0.8;
+    text-align: center;
 }
 .typeahead:focus {
     outline: none;
 }
 .tt-hint {
+    display: none;
     color: #999999;
+    text-align: center;
 }
 .tt-menu {
     background-color: #FFFFFF;
