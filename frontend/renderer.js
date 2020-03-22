@@ -200,8 +200,8 @@ class Renderer {
     }
 
     setYPositions() {
-        let yWidth = 240
-        let yOffset = 160
+        let yWidth = 270
+        let yOffset = 190
 
         this.g.nodes.forEach(node => node.y = node.rank * yWidth - yOffset)
     }

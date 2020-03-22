@@ -1,6 +1,6 @@
 window.onload = function() {
     let pw = 100
-    let ph = 200
+    let ph = 230
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
@@ -46,18 +46,40 @@ window.onload = function() {
         return p
     }
 
-    let createShowLink = function(id, name, func) {
-        let link = createLink(id, name, async () => {
+    // let createShowLink = function(id, name, func) {
+    //     let link = createLink(id, name, async () => {
+    //         let result = await func(id)
+    //         await result.reduce(
+    //             (p, id) => p.then(() => showPerson(id).then(() => render())),
+    //             Promise.resolve(null)
+    //         );
+    //     })
+    //     return link
+    // }
+
+    let ICONS = {
+        "PARENTS": "./img/icons8-parenting-50.png",
+        "PARTNERS": "./img/icons8-heart-50.png",
+        "SIBLINGS": "./img/icons8-flow-chart-50.png",
+        "CHILDREN": "./img/icons8-baby-50.png",
+    }
+
+    let createShowLink = function(id, relativeType, func) {
+        let label = toTitleCase(relativeType)
+        let div = document.createElement("div")
+        div.className = "control"
+        div.innerHTML = `<img src='${ICONS[relativeType]}' alt=${label}></img>`
+        div.onclick = async () => {
             let result = await func(id)
             await result.reduce(
                 (p, id) => p.then(() => showPerson(id).then(() => render())),
                 Promise.resolve(null)
             );
-        })
-        return link
+        }
+        return div
     }
 
-    let createHideLink = function(id, name, func) {
+    let createHideLink = function(id, type, func) {
         let link = createLink(id, name, () => {
             func(id)
             render()
@@ -72,24 +94,39 @@ window.onload = function() {
         var container = document.createElement("div")
         container.className = focusedId == id ? "person focused" : "person"
         container.id = id
-        container.innerHTML = "<h3>" + person.name + "</h3>"
 
-        Object.values(RelativeType).forEach(type => {
-            if (cc.hasHiddenRelatives(id, type)) {
-                let label = toTitleCase(type)
-                container.append(createShowLink(id, label, cc.fetchHiddenRelatives(type)))
-            }
+        container.innerHTML = `
+            <div class="profile-pic"></div>
+            <div class="content">
+                <h3>${person.name}</h3>
+                <p>${person.birthYear}-${person.deathYear}</p>
+                <p>${person.residence}</p>
+            </div>
+        `
+
+        var controls = document.createElement("div")
+        controls.className = "controls"
+
+        relativeTypes = Object.values(RelativeType).filter(type => cc.hasHiddenRelatives(id, type))
+        let numLinks = relativeTypes.length
+
+        relativeTypes.forEach(type => {
+            let link = createShowLink(id, type, cc.fetchHiddenRelatives(type))
+            link.className += ` spread-${numLinks}`
+            controls.append(link)
         })
 
-        let link = createLink(id, "Details", () => {
-            showModal(id)
-            // showEditModal(id)
-        })
-        container.append(link)
+        container.append(controls)
 
-        if (visible.size > 1) {
-            container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
-        }
+        // let link = createLink(id, "Details", () => {
+        //     showModal(id)
+        //     // showEditModal(id)
+        // })
+        // container.append(link)
+
+        // if (visible.size > 1) {
+        //     container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
+        // }
 
         canvas.append(container)
 
@@ -118,7 +155,7 @@ window.onload = function() {
         }
 
         // render elbowed line
-        let yClearance = ph / 2 + 20
+        let yClearance = ph - 30
         renderLine(x1, y1, x1, y1 + yClearance)
         renderLine(x1, y1 + yClearance, x2, y1 + yClearance)
         renderLine(x2, y1 + yClearance, x2, y2)
@@ -128,11 +165,11 @@ window.onload = function() {
         let partnerLeft = marriageNode.partners[0]
         let partnerRight = marriageNode.partners[1]
 
-        renderLine(partnerLeft.x + pw / 2, partnerLeft.y, partnerRight.x - pw / 2, partnerRight.y)
+        renderLine(partnerLeft.x + pw / 2, partnerLeft.y - ph / 4, partnerRight.x - pw / 2, partnerRight.y - ph / 4)
     }
 
     let renderChildLine = function(marriageNode, childNode) {
-        renderLine(marriageNode.x, marriageNode.y, childNode.x, childNode.y - ph / 2)
+        renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2)
     }
 
     let preprocessVisible = function(visible) {

@@ -1,6 +1,7 @@
 __pycache__
 yarn-error.log
 */.DS_Store
+.DS_Store
 .vscode/
 .idea/*
 .idea*

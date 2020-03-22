@@ -71,35 +71,100 @@ body {
 /* MAIN CANVAS */
 div#container {
     position: relative;
-    height: 700px;
+    height: 100%;
     border: 1px solid blue;
     cursor: all-scroll;
     overflow: hidden;
+    background-color: FLORALWHITE;
 }
 
 div#canvas {
     position: relative;
     height: 700px;
+
     /*border: 1px solid red;*/
 }
 
 div.person {
     position: absolute;
     width: 100px;
-    height: 200px;
+    height: 230px;
     text-align: center;
-    border: 2px solid red;
     border-radius: 5px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
     cursor: pointer;
+}
+
+div.person div.profile-pic {
+    width: 100%;
+    height: 100px;
+    background-image: url("img/test.png");
+    background-size: cover;
+    border-radius: 5px 5px 0 0;
+}
+
+div.person div.content {
     padding: 10px;
 }
 
-div.person h3 {
-    font-size: 20px;
+div.person div.controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    border-radius: 0 0 5px 5px;
+    border-top: 1px solid lightgrey;
+    overflow: hidden;
+    background-color: GAINSBORO;
 }
 
-div.person.focused {
-    border: 4px solid green;
+div.controls div.control {
+    display: inline-block;
+    height: 100%;
+    border-top: 1px solid grey;
+    opacity: 0.4;
+}
+
+div.controls div.control:hover{
+    opacity: 0.9;
+}
+
+div.controls div.control img {
+    margin: auto;
+    padding: 4px;
+    max-width: 30px;
+}
+
+div.controls .spread-1 {
+    width: 100%
+}
+div.controls .spread-2 {
+    width: 50%
+}
+div.controls .spread-3 {
+    width: 33%
+}
+div.controls .spread-4 {
+    width: 25%
+}
+
+div.person h3 {
+    font-size: 1em;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* number of lines to show */
+}
+
+div.person p {
+    font-size: 0.9em;
+    line-height: 1em;
+    margin-top: 0px;
+    margin-bottom: 0.1rem;
 }
 
 div.marriage {
@@ -111,11 +176,6 @@ div.marriage {
 div.line {
     position: absolute;
     border: 0.5px solid gray;
-}
-
-div.person p {
-    font-size: 10pt;
-    line-height: 11pt;
 }
 
 /* MODAL */
