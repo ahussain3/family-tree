@@ -9,6 +9,9 @@ window.onload = function() {
 
     let cc = new ControlCenter(data, visible)
 
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip()
+
     // RENDERER
     // Takes a set of nodes and renders them to screen.
     let mainContainer = document.querySelector("div#container")
@@ -46,17 +49,6 @@ window.onload = function() {
         return p
     }
 
-    // let createShowLink = function(id, name, func) {
-    //     let link = createLink(id, name, async () => {
-    //         let result = await func(id)
-    //         await result.reduce(
-    //             (p, id) => p.then(() => showPerson(id).then(() => render())),
-    //             Promise.resolve(null)
-    //         );
-    //     })
-    //     return link
-    // }
-
     let ICONS = {
         "PARENTS": "./img/icons8-parenting-50.png",
         "PARTNERS": "./img/icons8-heart-50.png",
@@ -67,9 +59,14 @@ window.onload = function() {
     let createShowLink = function(id, relativeType, func) {
         let label = toTitleCase(relativeType)
         let div = document.createElement("div")
+        div.setAttribute('data-toggle', 'tooltip')
+        div.setAttribute('data-placement', 'bottom')
+        div.setAttribute('title', label)
         div.className = "control"
         div.innerHTML = `<img src='${ICONS[relativeType]}' alt=${label}></img>`
-        div.onclick = async () => {
+        div.onclick = async (e) => {
+            e.stopPropagation()
+            changeFocus(id)
             let result = await func(id)
             await result.reduce(
                 (p, id) => p.then(() => showPerson(id).then(() => render())),
@@ -94,6 +91,7 @@ window.onload = function() {
         var container = document.createElement("div")
         container.className = focusedId == id ? "person focused" : "person"
         container.id = id
+        container.onclick = () => showModal(id)
 
         container.innerHTML = `
             <div class="profile-pic"></div>
@@ -103,6 +101,15 @@ window.onload = function() {
                 <p>${person.residence}</p>
             </div>
         `
+
+        let hidePersonIcon = document.createElement("div")
+        hidePersonIcon.className = "hide-person"
+        hidePersonIcon.innerHTML = "<img src='./img/icons8-hide-50.png' alt='hide'></img>"
+        hidePersonIcon.onclick = (e) => {
+            e.stopPropagation()
+            hidePerson(id)
+        }
+        container.prepend(hidePersonIcon)
 
         var controls = document.createElement("div")
         controls.className = "controls"
@@ -115,18 +122,7 @@ window.onload = function() {
             link.className += ` spread-${numLinks}`
             controls.append(link)
         })
-
         container.append(controls)
-
-        // let link = createLink(id, "Details", () => {
-        //     showModal(id)
-        //     // showEditModal(id)
-        // })
-        // container.append(link)
-
-        // if (visible.size > 1) {
-        //     container.append(createHideLink(id, "Hide", (id) => hidePerson(id)))
-        // }
 
         canvas.append(container)
 
@@ -567,7 +563,7 @@ window.onload = function() {
     }
 
     document.querySelector('#reset-btn').addEventListener("click", reset)
-    document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
+    // document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
     document.querySelector("#submit-edit-form-btn").addEventListener("click", submitEditPerson)
     document.querySelector('#show-edit-modal').addEventListener("click", handleEditPerson)
 };

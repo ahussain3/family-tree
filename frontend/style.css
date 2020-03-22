@@ -96,6 +96,24 @@ div.person {
     cursor: pointer;
 }
 
+div.person div.hide-person {
+    max-width: 30px;
+    max-height: 30px;
+    border-radius: 5px;
+    float: right;
+    background-color: lightgrey;
+    opacity: 0.4;
+}
+
+div.person div.hide-person:hover {
+    opacity: 0.9;
+}
+
+div.person div.hide-person img {
+    width: 100%;
+    padding: 4px;
+}
+
 div.person div.profile-pic {
     width: 100%;
     height: 100px;
