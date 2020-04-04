@@ -376,13 +376,16 @@ window.onload = function() {
         let person = await fetchPerson(id)
         let birthString = (person.birthYear ? person.birthYear : "") + "-" + (person.deathYear ? person.deathYear : "")
 
+        let profilePhoto = person.profilePhoto || "test.png"
+        let profilePhotoUrl = getPhotoUrl(profilePhoto)
+
         // name, residence, birth/death year, bio
         modal.find("#id").text(id)
         modal.find(".modal-title").text(person.name)
         modal.find(".modal-residence").text(person.residence)
         modal.find(".modal-birth").text(birthString)
         modal.find(".modal-bio").text(person.biography || "No bio has been provided yet for this person.")
-        modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
+        modal.find(".modal-header").css("background-image", `url('${profilePhotoUrl}')`)
 
         modal.modal()
     }
