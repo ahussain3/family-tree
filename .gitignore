@@ -1,4 +1,4 @@
-backend/profile_photos/
+src/profile_photos/
 
 __pycache__
 yarn-error.log
