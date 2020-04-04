@@ -4,7 +4,9 @@ window.onload = function() {
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set([])
+
+    const urlParams = new URLSearchParams(window.location.search);
+    var visible = new Set(urlParams.get("v").split(" "))
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -185,6 +187,7 @@ window.onload = function() {
         // if a single parent and a child are on screen. The other parent should
         // also be visible.
         // TODO(Awais) Make this code less ugly and more comprehensible
+        var makeVisible = new Set([])
         visible.forEach(id => {
             let person = data[id]
             if (person.marriages) {
@@ -193,7 +196,7 @@ window.onload = function() {
                     if (_.some(marriage.children, item => visible.has(item))) {
                         marriage.partners.forEach(partnerId => {
                             if (!visible.has(partnerId)) {
-                                visible.add(partnerId)
+                                makeVisible.add(partnerId)
                             }
                         })
                     }
@@ -201,11 +204,11 @@ window.onload = function() {
             }
         })
 
-        return visible
+        return new Set([...visible, ...makeVisible])
     }
 
     let renderTree = function () {
-        let renderer = new Renderer(data, preprocessVisible(visible))
+        let renderer = new Renderer(data, visible)
         renderer.render().forEach(item => {
             if (item instanceof Person) {
                 renderPerson(item.id, item.x, item.y)
@@ -255,8 +258,17 @@ window.onload = function() {
     }
 
     let main = async function() {
+        // This is bad. We shouldn't need to run the same line of code twice.
+        // There must be a neater way to handle the preprocess case.
+        await Promise.all([...visible].map(id => fetchPerson(id)))
+        visible = preprocessVisible(visible)
         await Promise.all([...visible].map(id => fetchPerson(id)))
         render()
+
+        // Todo(Awais): Right now we have to render at least once before changing focus. It seems strange to not be able to initialize with a focused value.
+        if (visible.size > 0) {
+           changeFocus(visible.values().next().value)
+        }
     }
 
     main()
@@ -321,13 +333,21 @@ window.onload = function() {
     }
 
     // INTERACTION
+    let updateUrlParams = function() {
+        urlParams.set("v", Array(...visible).join(" "))
+        history.pushState(null, '', window.location.pathname + '?' + urlParams.toString());
+    }
+
     let showPerson = async function(id) {
         // calculate shortest path from this person to another node that is already visible
         await shortestPath(id, visible).then(result => {
             result.concat(id).forEach(item => {
                 visible.add(item)
+                visible = preprocessVisible(visible)
             })
         })
+        updateUrlParams()
+        render()
     }
 
     let hidePerson = function(id) {
@@ -335,12 +355,14 @@ window.onload = function() {
         if (focusedId == id) {
             changeFocus(_.sample(Array.from(visible)))
         }
+        updateUrlParams()
         render()
     }
 
     let reset = function(event, value) {
         visible = new Set()
         focusedId = null
+        updateUrlParams()
         render()
     }
 
@@ -359,7 +381,6 @@ window.onload = function() {
         showPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
         setTimeout(() => $('#search-bar-typeahead input.typeahead.tt-input').val(""), 10)
       })
-      changeFocus(result.id)
     }
 
     let handleCreatePerson = () => {
