@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, render_template
 from flask_graphql import GraphQLView
 from flask_cors import CORS, cross_origin
 
@@ -24,7 +24,7 @@ def log_request_info():
 
 @app.route('/')
 def root():
-    return "Hello world! Go to /graphql"
+    return render_template("index.html")
 
 # Graphql endpoint
 app.add_url_rule(

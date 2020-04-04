@@ -1,4 +1,7 @@
+console.log("Hello world!!")
+
 window.onload = function() {
+    console.log("Inside the onload!!")
     let pw = 100
     let ph = 230
 
@@ -6,7 +9,7 @@ window.onload = function() {
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
 
     const urlParams = new URLSearchParams(window.location.search);
-    var visible = new Set(urlParams.get("v").split(" "))
+    var visible = new Set(urlParams.get("v") ? urlParams.get("v").split(" ") : null)
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -52,10 +55,10 @@ window.onload = function() {
     }
 
     let ICONS = {
-        "PARENTS": "./img/icons8-parenting-50.png",
-        "PARTNERS": "./img/icons8-heart-50.png",
-        "SIBLINGS": "./img/icons8-flow-chart-50.png",
-        "CHILDREN": "./img/icons8-baby-50.png",
+        "PARENTS": "/static/img/icons8-parenting-50.png",
+        "PARTNERS": "/static/img/icons8-heart-50.png",
+        "SIBLINGS": "/static/img/icons8-flow-chart-50.png",
+        "CHILDREN": "/static/img/icons8-baby-50.png",
     }
 
     let createShowLink = function(id, relativeType, func) {
@@ -119,7 +122,7 @@ window.onload = function() {
 
         let hidePersonIcon = document.createElement("div")
         hidePersonIcon.className = "hide-person"
-        hidePersonIcon.innerHTML = "<img src='./img/icons8-hide-50.png' alt='hide'></img>"
+        hidePersonIcon.innerHTML = "<img src='/static/img/icons8-hide-50.png' alt='hide'></img>"
         hidePersonIcon.onclick = (e) => {
             e.stopPropagation()
             hidePerson(id)
