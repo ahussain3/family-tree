@@ -40,16 +40,12 @@ let personQuery = `query personQuery($id: ID) {
     parents {
       __typename
       id
-      startYear
-      endYear
       partners { id }
       children { id }
     }
     marriages {
       __typename
       id
-      startYear
-      endYear
       partners { id }
       children { id }
     }
@@ -155,16 +151,12 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
       parents {
         __typename
         id
-        startYear
-        endYear
         partners { id }
         children { id }
       }
       marriages {
         __typename
         id
-        startYear
-        endYear
         partners { id }
         children { id }
       }

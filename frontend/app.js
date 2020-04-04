@@ -328,7 +328,6 @@ window.onload = function() {
                 visible.add(item)
             })
         })
-
     }
 
     let hidePerson = function(id) {
@@ -360,6 +359,7 @@ window.onload = function() {
         showPerson(result.id).then(() => render()).then(() => changeFocus(result.id))
         setTimeout(() => $('#search-bar-typeahead input.typeahead.tt-input').val(""), 10)
       })
+      changeFocus(result.id)
     }
 
     let handleCreatePerson = () => {

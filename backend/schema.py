@@ -48,8 +48,8 @@ class Person(gql.ObjectType):
 class Marriage(gql.ObjectType):
     """A marriage between two people"""
     id = gql.ID(required=True)
-    start_year = gql.Int()
-    end_year = gql.Int()
+    # start_year = gql.Int()
+    # end_year = gql.Int()
     partners = gql.List(lambda: Person)
     children = gql.List(lambda: Person)
 
@@ -80,8 +80,6 @@ class UpsertPerson(gql.Mutation):
 class AddMarriage(gql.Mutation):
     class Arguments:
         partner_b_id = gql.ID(required=True)
-        start_year = gql.Int()
-        end_year = gql.Int()
 
     marriage = gql.Field(Marriage, required=True)
 

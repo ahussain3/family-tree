@@ -55,10 +55,10 @@ def photo_upload():
     path = os.path.join(PHOTO_UPLOAD_PATH, photo_name)
 
     # don't reupload if the picture already exists
-    # if not os.path.isfile(path):  # add this back in later
-    with open(path, "w"):
-        file.seek(0)
-        file.save(path)
+    if not os.path.isfile(path):
+        with open(path, "w"):
+            file.seek(0)
+            file.save(path)
 
     # figure out how to attach the picture to a person
     database.add_profile_photo(id, photo_name)
