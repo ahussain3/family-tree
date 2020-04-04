@@ -54,9 +54,12 @@ class MarriageInput(gql.InputObjectType):
     partner_b_id = gql.String(required=True)
     children = gql.List(gql.String)
 
+class GenerateId(gql.ObjectType):
+    id = gql.ID(required=True)
+
 class UpsertPerson(gql.Mutation):
     class Arguments:
-        id = gql.ID()
+        id = gql.ID(required=True)
         name = gql.String()
         gender = GenderType()
         residence = gql.String()
@@ -94,6 +97,7 @@ class AddChildren(gql.Mutation):
 
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
+    generate_id = gql.Field(GenerateId)
     person = gql.Field(Person, id=gql.ID())
     search_persons = gql.Field(gql.List(Person), name=gql.String())
     search_marriages = gql.Field(gql.List(Marriage), name=gql.String())
@@ -104,6 +108,15 @@ class Mutation(gql.ObjectType):
     add_children = AddChildren.Field(required=True)
 
 # Resolvers
+# Creating a new person is a two step process. First you have to request an
+# opaque_id, which you must then include in your request to UpsertPerson.
+# This is important because the frontend can immediately use the id to start
+# uploading profile pictures. Unused ids are thrown away and not stored in the
+# database.
+@resolver_for(Query, "generate_id")
+def query_generate_id(self, info):
+    return GenerateId(id=database.generate_id())
+
 @resolver_for(Query, "person")
 def query_person(self, info, *, id):
     person = database.get_node(id)
@@ -175,26 +188,16 @@ def mutate_upsert_person(
 ):
     marriages = marriages or []
 
-    # PERSONAL DETAILS
-    if id is None:
-        person = database.add_person(
-            name=name,
-            gender=gender,
-            residence=residence,
-            birth_year=birth_year,
-            death_year=death_year,
-            biography=biography,
-        )
-    else:
-        person = database.update_person(
-            id=id,
-            name=name,
-            gender=gender,
-            residence=residence,
-            birth_year=birth_year,
-            death_year=death_year,
-            biography=biography
-        )
+    assert id is not None, "must have id to create person"
+    person = database.upsert_person(
+        id=id,
+        name=name,
+        gender=gender,
+        residence=residence,
+        birth_year=birth_year,
+        death_year=death_year,
+        biography=biography
+    )
 
     # PARENTS
     if parents is None:
