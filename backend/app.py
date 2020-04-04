@@ -1,12 +1,19 @@
+import os
+
 from flask import Flask, request
 from flask_graphql import GraphQLView
 from flask_cors import CORS, cross_origin
+
+import hashlib
 
 from schema import schema
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # max 5mb file upload
+
+PHOTO_UPLOAD_PATH = os.environ.get("PHOTO_UPLOAD_PATH", "profile_photos")
 
 import pprint
 
@@ -27,3 +34,38 @@ app.add_url_rule(
         graphiql=True,
     )
 )
+
+@app.route('/photo_upload', methods=["GET", "POST"])
+def photo_upload():
+    """Upload a profile photo"""
+    if request.method == "GET":
+        return "Welcome to the photo upload endpoint!"
+
+    id = request.form["id"]
+    file = request.files["profile_photo"]
+    extension = file.filename.split(".")[-1]
+    if extension not in ("png", "jpg", "jpeg"):
+        return "Filetype not recognized", 415
+
+    # figure out a naming scheme for the file
+    file_data = file.read()
+    digest = hashlib.md5(file_data).hexdigest()
+
+    path = os.path.join(PHOTO_UPLOAD_PATH, f"{digest}.{extension}")
+
+    # don't reupload if the picture already exists
+    # if not os.path.isfile(path):  # add this back in later
+    with open(path, "w"):
+        file.seek(0)
+        file.save(path)
+
+    # figure out how to attach the picture to a person
+
+    # (later) do some image processing to generate thumbnails and minify
+    # (later) figure out multiple pictures per person
+
+    return "ok, all done"
+
+@app.route('/photo', methods=["GET"])
+def photo():
+    """Retrieve a profile photo"""
