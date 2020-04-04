@@ -22,7 +22,10 @@ def neo_to_gql(cls, object):
     return cls(**fields)
 
 def mk_person(object):
-    return neo_to_gql(Person, object)
+    result = neo_to_gql(Person, object)
+    if result.name is None:
+        result.name = "unknown name"
+    return result
 
 def mk_marriage(partner_a, partner_b):
     partners = sorted([partner_a, partner_b], key=lambda p: p.id)

@@ -1,10 +1,11 @@
 import os
 
-from flask import Flask, request
+from flask import Flask, request, send_file
 from flask_graphql import GraphQLView
 from flask_cors import CORS, cross_origin
 
 import hashlib
+import database
 
 from schema import schema
 
@@ -50,8 +51,8 @@ def photo_upload():
     # figure out a naming scheme for the file
     file_data = file.read()
     digest = hashlib.md5(file_data).hexdigest()
-
-    path = os.path.join(PHOTO_UPLOAD_PATH, f"{digest}.{extension}")
+    photo_name = f"{digest}.{extension}"
+    path = os.path.join(PHOTO_UPLOAD_PATH, photo_name)
 
     # don't reupload if the picture already exists
     # if not os.path.isfile(path):  # add this back in later
@@ -60,12 +61,18 @@ def photo_upload():
         file.save(path)
 
     # figure out how to attach the picture to a person
+    database.add_profile_photo(id, photo_name)
 
     # (later) do some image processing to generate thumbnails and minify
     # (later) figure out multiple pictures per person
 
     return "ok, all done"
 
-@app.route('/photo', methods=["GET"])
-def photo():
+@app.route('/photo/<photo_name>/', methods=["GET"])
+def photo(photo_name: str):
     """Retrieve a profile photo"""
+    path = os.path.join(PHOTO_UPLOAD_PATH, photo_name)
+    if not os.path.isfile(path):
+        return "No photo found", 404
+
+    return send_file(path)
