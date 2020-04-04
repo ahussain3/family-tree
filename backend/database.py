@@ -50,7 +50,7 @@ def get_node(opaque_id):
 
 def get_node_or_none(opaque_id):
     try:
-        get_node(opaque_id)
+        return get_node(opaque_id)
     except ReferenceError:
         return None
 
@@ -99,7 +99,7 @@ def upsert_person(id, **kwargs):
 
 def add_profile_photo(id, photo_name):
     person = upsert_person(id)
-    person.update({"photo_name": photo_name})
+    person.update({"profile_photo": photo_name})
     graph.push(person)
     return person
 

@@ -42,6 +42,7 @@ class Person(gql.ObjectType):
     birth_year = gql.Int()
     death_year = gql.Int()
     biography = gql.String()
+    profile_photo = gql.String()
     parents = gql.Field(lambda: Marriage, required=False)
     marriages = gql.List(lambda: Marriage)
 

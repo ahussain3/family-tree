@@ -97,13 +97,16 @@ window.onload = function() {
         }
 
         let person = data[id]
+        let profilePhoto = person.profilePhoto || "test.png"
+        let profilePhotoUrl = getPhotoUrl(profilePhoto)
+
         var container = document.createElement("div")
         container.className = focusedId == id ? "person focused" : "person"
         container.id = id
         container.onclick = () => showModal(id)
 
         container.innerHTML = `
-            <div class="profile-pic"></div>
+            <div class="profile-pic" style="background-image: url(${profilePhotoUrl});"></div>
             <div class="gender-line ${person.gender.toLowerCase()}"></div>
             <div class="content">
                 <h3>${person.name}</h3>
