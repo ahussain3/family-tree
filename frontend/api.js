@@ -32,7 +32,6 @@ let personQuery = `query personQuery($id: ID) {
     id
     name
     gender
-    photoUrl
     residence
     birthYear
     deathYear
@@ -148,11 +147,11 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
       id
       name
       gender
-      photoUrl
       residence
       birthYear
       deathYear
       biography
+      profilePhoto
       parents {
         __typename
         id

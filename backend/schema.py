@@ -37,7 +37,6 @@ class Person(gql.ObjectType):
     id = gql.ID(required=True)
     name = gql.String(required=True)
     gender = GenderType()
-    photo_url = gql.String()
     residence = gql.String()
     birth_year = gql.Int()
     death_year = gql.Int()
@@ -150,10 +149,6 @@ def person_parents(self, info):
         partner_a=mk_person(parents[0]),
         partner_b=mk_person(parents[1]),
     )
-
-@resolver_for(Person, "photo_url")
-def person_photo_url(self, info):
-    return "https://images.unsplash.com/photo-1564694245232-0a1ad9f3cd38?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80"
 
 @resolver_for(Person, "marriages")
 def person_marriages(self, info):
