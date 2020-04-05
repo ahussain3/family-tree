@@ -44,7 +44,7 @@ def photo_upload():
     id = request.form["id"]
     file = request.files.get("profile_photo", None)
     if not file:
-        return "No file uploaded", 200
+        return "", 204
 
     extension = file.filename.split(".")[-1]
     if extension not in ("png", "jpg", "jpeg"):
