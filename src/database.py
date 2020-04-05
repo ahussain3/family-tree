@@ -95,6 +95,7 @@ def upsert_person(id, **kwargs):
 
     person.update({k:v for k,v in kwargs.items() if v is not None})
     graph.push(person)
+    import pdb; pdb.set_trace();
     return person
 
 def add_profile_photo(id, photo_name):
