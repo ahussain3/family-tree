@@ -586,19 +586,24 @@ window.onload = function() {
 
         // Submit profile photo
         console.log("submit profilePhoto")
-        formData = new FormData($('#profile-photo-form')[0])
-        let photoName = await $.ajax({
-            url:'http://localhost:5008/photo_upload',
-            type:'POST',
-            enctype: 'multipart/form-data',
-            processData: false,
-            contentType: false,
-            cache: false,
-            data: formData,
-            success:function(response){
-                console.log(response);
-            }
-        });
+        let profilePhotoForm = document.querySelector("#profile-photo-form")
+        var photoName = null
+
+        if (profilePhotoForm["profile_photo"].value) {
+            formData = new FormData($('#profile-photo-form')[0])
+            photoName = await $.ajax({
+                url:'http://localhost:5008/photo_upload',
+                type:'POST',
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                cache: false,
+                data: formData,
+                success:function(response){
+                    console.log(response);
+                }
+            });
+        }
 
         // Submit upsertPerson mutation
         let id = form["id"].value || null
