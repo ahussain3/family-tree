@@ -1,6 +1,6 @@
 import graphene as gql
-from gql_types import GenderType
-import database
+from src.gql_types import GenderType
+import src.database as database
 import random
 
 def resolver_for(cls, name):
