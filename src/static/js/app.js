@@ -607,7 +607,7 @@ window.onload = function() {
     }
 
     document.querySelector('#reset-btn').addEventListener("click", reset)
-    // document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
+    document.querySelector('#create-person').addEventListener("click", handleCreatePerson)
     document.querySelector("#submit-edit-form-btn").addEventListener("click", submitEditPerson)
     document.querySelector('#show-edit-modal').addEventListener("click", handleEditPerson)
 };

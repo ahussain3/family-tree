@@ -86,17 +86,35 @@ div#container {
     background-color: FLORALWHITE;
 }
 
-div#clear-canvas {
-    position: fixed;
+div.bottom-left {
     left: 0;
     bottom: 0;
-    padding: 20px;
-    color: FIREBRICK;
-    text-transform: lowercase;
-    cursor: pointer;
 }
 
-div#clear-canvas:hover {
+div.top-right {
+    top: 0;
+    right: 0;
+}
+
+div.nav-bar {
+    position: fixed;
+    cursor: pointer;
+    z-index: 99;
+}
+
+div.nav-bar ul {
+    list-style-type: none;
+    text-transform: lowercase;
+    margin: 0;
+    padding: 30px;
+}
+
+div.nav-bar li {
+    display: inline-block;
+    padding: 0 10px;
+}
+
+div.nav-bar li:hover {
     font-weight: bold;
 }
 
