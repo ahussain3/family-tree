@@ -5,9 +5,9 @@ from flask_graphql import GraphQLView
 from flask_cors import CORS, cross_origin
 
 import hashlib
-import database
+import src.database as database
 
-from schema import schema
+from src.schema import schema
 
 app = Flask(__name__)
 cors = CORS(app)
