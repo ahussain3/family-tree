@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Photo Upload test</title>
+    <link rel="stylesheet" href="./css/bootstrap-4.3.1.min.css">
+    <link rel="stylesheet" href="./css/select2.min.css"/>
+    <link rel="stylesheet" href="./style.css">
+
+    <script src="./js/jquery-3.4.1.js"></script>
+    <script src="./js/select2.min.js"></script>
+    <script src="./js/popper-1.14.7.min.js"></script>
+    <script src="./js/bootstrap-4.3.1.min.js"></script>
+    <script src="./js/typeahead.js"></script>
+    <script src="./js/underscore.js"></script>
+    <script src="./js/graphql.js"></script>
+    <script src="./js/pan.js"></script>
+    <script src="./api.js"></script>
+    <script src="./control_center.js"></script>
+    <script src="./graph.js"></script>
+    <script src="./renderer.js"></script>
+    <script src="./app.js"></script>
+</head>
+<body>
+
+    <form method="post" action="http://localhost:5008/photo_upload" enctype="multipart/form-data">
+        <div>
+          <label> Profile Picture:
+            <input type="hidden" name="id" value="P_w2E8ptQkkxq5">
+            <input type="file" accept=".jpg, .jpeg, .png" name="profile_photo" required>
+          </label>
+        </div>
+        <input type="submit" name="submit">
+    </form>
+
+</body>
+</html>

@@ -1,10 +1,15 @@
+console.log("Hello world!!")
+
 window.onload = function() {
+    console.log("Inside the onload!!")
     let pw = 100
     let ph = 230
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
-    var visible = new Set([])
+
+    const urlParams = new URLSearchParams(window.location.search);
+    var visible = new Set(urlParams.get("v") ? urlParams.get("v").split(" ") : null)
     var focusedId = null
 
     let cc = new ControlCenter(data, visible)
@@ -50,10 +55,10 @@ window.onload = function() {
     }
 
     let ICONS = {
-        "PARENTS": "./img/icons8-parenting-50.png",
-        "PARTNERS": "./img/icons8-heart-50.png",
-        "SIBLINGS": "./img/icons8-flow-chart-50.png",
-        "CHILDREN": "./img/icons8-baby-50.png",
+        "PARENTS": "/static/img/icons8-parenting-50.png",
+        "PARTNERS": "/static/img/icons8-heart-50.png",
+        "SIBLINGS": "/static/img/icons8-flow-chart-50.png",
+        "CHILDREN": "/static/img/icons8-baby-50.png",
     }
 
     let createShowLink = function(id, relativeType, func) {
@@ -97,13 +102,16 @@ window.onload = function() {
         }
 
         let person = data[id]
+        let profilePhoto = person.profilePhoto || "test.png"
+        let profilePhotoUrl = getPhotoUrl(profilePhoto)
+
         var container = document.createElement("div")
         container.className = focusedId == id ? "person focused" : "person"
         container.id = id
         container.onclick = () => showModal(id)
 
         container.innerHTML = `
-            <div class="profile-pic"></div>
+            <div class="profile-pic" style="background-image: url(${profilePhotoUrl});"></div>
             <div class="gender-line ${person.gender.toLowerCase()}"></div>
             <div class="content">
                 <h3>${person.name}</h3>
@@ -114,7 +122,7 @@ window.onload = function() {
 
         let hidePersonIcon = document.createElement("div")
         hidePersonIcon.className = "hide-person"
-        hidePersonIcon.innerHTML = "<img src='./img/icons8-hide-50.png' alt='hide'></img>"
+        hidePersonIcon.innerHTML = "<img src='/static/img/icons8-hide-50.png' alt='hide'></img>"
         hidePersonIcon.onclick = (e) => {
             e.stopPropagation()
             hidePerson(id)
@@ -182,6 +190,7 @@ window.onload = function() {
         // if a single parent and a child are on screen. The other parent should
         // also be visible.
         // TODO(Awais) Make this code less ugly and more comprehensible
+        var makeVisible = new Set([])
         visible.forEach(id => {
             let person = data[id]
             if (person.marriages) {
@@ -190,7 +199,7 @@ window.onload = function() {
                     if (_.some(marriage.children, item => visible.has(item))) {
                         marriage.partners.forEach(partnerId => {
                             if (!visible.has(partnerId)) {
-                                visible.add(partnerId)
+                                makeVisible.add(partnerId)
                             }
                         })
                     }
@@ -198,11 +207,11 @@ window.onload = function() {
             }
         })
 
-        return visible
+        return new Set([...visible, ...makeVisible])
     }
 
     let renderTree = function () {
-        let renderer = new Renderer(data, preprocessVisible(visible))
+        let renderer = new Renderer(data, visible)
         renderer.render().forEach(item => {
             if (item instanceof Person) {
                 renderPerson(item.id, item.x, item.y)
@@ -252,8 +261,17 @@ window.onload = function() {
     }
 
     let main = async function() {
+        // This is bad. We shouldn't need to run the same line of code twice.
+        // There must be a neater way to handle the preprocess case.
+        await Promise.all([...visible].map(id => fetchPerson(id)))
+        visible = preprocessVisible(visible)
         await Promise.all([...visible].map(id => fetchPerson(id)))
         render()
+
+        // Todo(Awais): Right now we have to render at least once before changing focus. It seems strange to not be able to initialize with a focused value.
+        if (visible.size > 0) {
+           changeFocus(visible.values().next().value)
+        }
     }
 
     main()
@@ -318,14 +336,21 @@ window.onload = function() {
     }
 
     // INTERACTION
+    let updateUrlParams = function() {
+        urlParams.set("v", Array(...visible).join(" "))
+        history.pushState(null, '', window.location.pathname + '?' + urlParams.toString());
+    }
+
     let showPerson = async function(id) {
         // calculate shortest path from this person to another node that is already visible
         await shortestPath(id, visible).then(result => {
             result.concat(id).forEach(item => {
                 visible.add(item)
+                visible = preprocessVisible(visible)
             })
         })
-
+        updateUrlParams()
+        render()
     }
 
     let hidePerson = function(id) {
@@ -333,12 +358,14 @@ window.onload = function() {
         if (focusedId == id) {
             changeFocus(_.sample(Array.from(visible)))
         }
+        updateUrlParams()
         render()
     }
 
     let reset = function(event, value) {
         visible = new Set()
         focusedId = null
+        updateUrlParams()
         render()
     }
 
@@ -373,13 +400,16 @@ window.onload = function() {
         let person = await fetchPerson(id)
         let birthString = (person.birthYear ? person.birthYear : "") + "-" + (person.deathYear ? person.deathYear : "")
 
+        let profilePhoto = person.profilePhoto || "test.png"
+        let profilePhotoUrl = getPhotoUrl(profilePhoto)
+
         // name, residence, birth/death year, bio
         modal.find("#id").text(id)
         modal.find(".modal-title").text(person.name)
         modal.find(".modal-residence").text(person.residence)
         modal.find(".modal-birth").text(birthString)
         modal.find(".modal-bio").text(person.biography || "No bio has been provided yet for this person.")
-        modal.find(".modal-header").css("background-image", `url('${person.photoUrl}')`)
+        modal.find(".modal-header").css("background-image", `url('${profilePhotoUrl}')`)
 
         modal.modal()
     }

@@ -1,3 +1,5 @@
+src/profile_photos/
+
 __pycache__
 yarn-error.log
 */.DS_Store

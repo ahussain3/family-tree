@@ -1,5 +1,7 @@
-// let url = "http://localhost:5008/graphql" // local
-let url ="http://35.242.170.73/graphql"  // prod
+let BASE_URL = "http://localhost:5008/" // local
+// let BASE_URL ="http://35.242.170.73/"  // prod
+let url = BASE_URL + "graphql"
+
 
 var graph = graphql(url, {
   method: "POST", // POST by default.
@@ -30,24 +32,20 @@ let personQuery = `query personQuery($id: ID) {
     id
     name
     gender
-    photoUrl
     residence
     birthYear
     deathYear
+    profilePhoto
     biography
     parents {
       __typename
       id
-      startYear
-      endYear
       partners { id }
       children { id }
     }
     marriages {
       __typename
       id
-      startYear
-      endYear
       partners { id }
       children { id }
     }
@@ -145,24 +143,20 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
       id
       name
       gender
-      photoUrl
       residence
       birthYear
       deathYear
       biography
+      profilePhoto
       parents {
         __typename
         id
-        startYear
-        endYear
         partners { id }
         children { id }
       }
       marriages {
         __typename
         id
-        startYear
-        endYear
         partners { id }
         children { id }
       }
@@ -211,4 +205,8 @@ let searchMarriages = function(query, sync, async) {
   }).catch(function (error) {
     console.log(error)
   })
+}
+
+let getPhotoUrl = function(photoName) {
+  return BASE_URL + "photo/" + photoName
 }

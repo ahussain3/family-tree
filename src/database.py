@@ -48,6 +48,12 @@ def get_node(opaque_id):
 
     return result.first()
 
+def get_node_or_none(opaque_id):
+    try:
+        return get_node(opaque_id)
+    except ReferenceError:
+        return None
+
 def get_relationship(nodes, rel_type):
     matcher = RelationshipMatcher(graph)
     return matcher.match(nodes, rel_type).first()
@@ -78,14 +84,22 @@ def search_persons(name):
     return list(result)
 
 # Create new entries
-def add_person(name, gender, *, residence, birth_year, death_year, biography):
-    person = Node(NodeType.PERSON.value, opaque_id=make_opaque_id("P"), **locals())
-    graph.create(person)
+def generate_id():
+    return make_opaque_id("P")
+
+def upsert_person(id, **kwargs):
+    person = get_node_or_none(id)
+    if person is None:
+        person = Node(NodeType.PERSON.value, opaque_id=id, **kwargs)
+        graph.create(person)
+
+    person.update({k:v for k,v in kwargs.items() if v is not None})
+    graph.push(person)
     return person
 
-def update_person(id, **kwargs):
-    person = get_node(id)
-    person.update({k:v for k,v in kwargs.items() if v is not None})
+def add_profile_photo(id, photo_name):
+    person = upsert_person(id)
+    person.update({"profile_photo": photo_name})
     graph.push(person)
     return person
 

@@ -22,7 +22,10 @@ def neo_to_gql(cls, object):
     return cls(**fields)
 
 def mk_person(object):
-    return neo_to_gql(Person, object)
+    result = neo_to_gql(Person, object)
+    if result.name is None:
+        result.name = "unknown name"
+    return result
 
 def mk_marriage(partner_a, partner_b):
     partners = sorted([partner_a, partner_b], key=lambda p: p.id)
@@ -34,19 +37,19 @@ class Person(gql.ObjectType):
     id = gql.ID(required=True)
     name = gql.String(required=True)
     gender = GenderType()
-    photo_url = gql.String()
     residence = gql.String()
     birth_year = gql.Int()
     death_year = gql.Int()
     biography = gql.String()
+    profile_photo = gql.String()
     parents = gql.Field(lambda: Marriage, required=False)
     marriages = gql.List(lambda: Marriage)
 
 class Marriage(gql.ObjectType):
     """A marriage between two people"""
     id = gql.ID(required=True)
-    start_year = gql.Int()
-    end_year = gql.Int()
+    # start_year = gql.Int()
+    # end_year = gql.Int()
     partners = gql.List(lambda: Person)
     children = gql.List(lambda: Person)
 
@@ -54,9 +57,12 @@ class MarriageInput(gql.InputObjectType):
     partner_b_id = gql.String(required=True)
     children = gql.List(gql.String)
 
+class GenerateId(gql.ObjectType):
+    id = gql.ID(required=True)
+
 class UpsertPerson(gql.Mutation):
     class Arguments:
-        id = gql.ID()
+        id = gql.ID(required=True)
         name = gql.String()
         gender = GenderType()
         residence = gql.String()
@@ -74,8 +80,6 @@ class UpsertPerson(gql.Mutation):
 class AddMarriage(gql.Mutation):
     class Arguments:
         partner_b_id = gql.ID(required=True)
-        start_year = gql.Int()
-        end_year = gql.Int()
 
     marriage = gql.Field(Marriage, required=True)
 
@@ -94,6 +98,7 @@ class AddChildren(gql.Mutation):
 
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
+    generate_id = gql.Field(GenerateId)
     person = gql.Field(Person, id=gql.ID())
     search_persons = gql.Field(gql.List(Person), name=gql.String())
     search_marriages = gql.Field(gql.List(Marriage), name=gql.String())
@@ -104,6 +109,15 @@ class Mutation(gql.ObjectType):
     add_children = AddChildren.Field(required=True)
 
 # Resolvers
+# Creating a new person is a two step process. First you have to request an
+# opaque_id, which you must then include in your request to UpsertPerson.
+# This is important because the frontend can immediately use the id to start
+# uploading profile pictures. Unused ids are thrown away and not stored in the
+# database.
+@resolver_for(Query, "generate_id")
+def query_generate_id(self, info):
+    return GenerateId(id=database.generate_id())
+
 @resolver_for(Query, "person")
 def query_person(self, info, *, id):
     person = database.get_node(id)
@@ -133,10 +147,6 @@ def person_parents(self, info):
         partner_a=mk_person(parents[0]),
         partner_b=mk_person(parents[1]),
     )
-
-@resolver_for(Person, "photo_url")
-def person_photo_url(self, info):
-    return "https://images.unsplash.com/photo-1564694245232-0a1ad9f3cd38?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80"
 
 @resolver_for(Person, "marriages")
 def person_marriages(self, info):
@@ -175,26 +185,16 @@ def mutate_upsert_person(
 ):
     marriages = marriages or []
 
-    # PERSONAL DETAILS
-    if id is None:
-        person = database.add_person(
-            name=name,
-            gender=gender,
-            residence=residence,
-            birth_year=birth_year,
-            death_year=death_year,
-            biography=biography,
-        )
-    else:
-        person = database.update_person(
-            id=id,
-            name=name,
-            gender=gender,
-            residence=residence,
-            birth_year=birth_year,
-            death_year=death_year,
-            biography=biography
-        )
+    assert id is not None, "must have id to create person"
+    person = database.upsert_person(
+        id=id,
+        name=name,
+        gender=gender,
+        residence=residence,
+        birth_year=birth_year,
+        death_year=death_year,
+        biography=biography
+    )
 
     # PARENTS
     if parents is None:
