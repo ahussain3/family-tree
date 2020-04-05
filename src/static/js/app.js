@@ -592,7 +592,7 @@ window.onload = function() {
         if (profilePhotoForm["profile_photo"].value) {
             formData = new FormData($('#profile-photo-form')[0])
             photoName = await $.ajax({
-                url:'http://localhost:5008/photo_upload',
+                url: BASE_URL + 'photo_upload',
                 type:'POST',
                 enctype: 'multipart/form-data',
                 processData: false,

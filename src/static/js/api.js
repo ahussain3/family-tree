@@ -1,5 +1,5 @@
-let BASE_URL = "http://localhost:5008/" // local
-// let BASE_URL ="http://35.242.170.73/"  // prod
+// let BASE_URL = "http://localhost:5008/" // local
+let BASE_URL ="http://35.242.170.73/"  // prod
 let url = BASE_URL + "graphql"
 
 
