@@ -64,8 +64,15 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-body">
+            <form id="profile-photo-form" method="post" enctype="multipart/form-data">
+              <label> Profile Picture:
+                <input type="hidden" id="id-profile-photo" name="id">
+                <input type="file" accept=".jpg, .jpeg, .png" name="profile_photo" required>
+              </label>
+            </form>
+
             <form id="edit-person-form" autocomplete="off">
-               <input type="hidden" id="id" name="id">
+              <input type="hidden" id="id" name="id">
               <div class="form-group">
                 <label for="name">Full Name</label>
                 <input type="text" class="form-control" id="name" placeholder="Their full name" required="">

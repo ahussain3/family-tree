@@ -69,6 +69,7 @@ class UpsertPerson(gql.Mutation):
         birth_year = gql.Int()
         death_year = gql.Int()
         biography = gql.String()
+        profile_photo = gql.String()
         parents = gql.String()
         marriages = gql.List(MarriageInput)
 
@@ -180,6 +181,7 @@ def mutate_upsert_person(
     birth_year=None,
     death_year=None,
     biography=None,
+    profile_photo=None,
     parents=None,
     marriages=None,
 ):
@@ -193,7 +195,8 @@ def mutate_upsert_person(
         residence=residence,
         birth_year=birth_year,
         death_year=death_year,
-        biography=biography
+        biography=biography,
+        profile_photo=profile_photo
     )
 
     # PARENTS

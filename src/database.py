@@ -97,12 +97,6 @@ def upsert_person(id, **kwargs):
     graph.push(person)
     return person
 
-def add_profile_photo(id, photo_name):
-    person = upsert_person(id)
-    person.update({"profile_photo": photo_name})
-    graph.push(person)
-    return person
-
 def delete_parents(child):
     for parent in get_parents(child["opaque_id"]):
         graph.separate(get_relationship([child, parent], RelationshipType.PARENT.value))

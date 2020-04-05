@@ -5,7 +5,6 @@ from flask_graphql import GraphQLView
 from flask_cors import CORS, cross_origin
 
 import hashlib
-import src.database as database
 
 from src.schema import schema
 
@@ -43,7 +42,10 @@ def photo_upload():
         return "Welcome to the photo upload endpoint!"
 
     id = request.form["id"]
-    file = request.files["profile_photo"]
+    file = request.files.get("profile_photo", None)
+    if not file:
+        return "No file uploaded", 200
+
     extension = file.filename.split(".")[-1]
     if extension not in ("png", "jpg", "jpeg"):
         return "Filetype not recognized", 415
@@ -60,13 +62,10 @@ def photo_upload():
             file.seek(0)
             file.save(path)
 
-    # figure out how to attach the picture to a person
-    database.add_profile_photo(id, photo_name)
-
     # (later) do some image processing to generate thumbnails and minify
     # (later) figure out multiple pictures per person
 
-    return "ok, all done"
+    return photo_name
 
 @app.route('/photo/<photo_name>/', methods=["GET"])
 def photo(photo_name: str):

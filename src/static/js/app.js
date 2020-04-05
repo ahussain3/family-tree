@@ -386,8 +386,9 @@ window.onload = function() {
       })
     }
 
-    let handleCreatePerson = () => {
-        showEditModal(null)
+    let handleCreatePerson = async () => {
+        const id = await generateId()
+        showEditModal(id)
     }
 
     let showModal = async function(id) {
@@ -436,14 +437,15 @@ window.onload = function() {
         form.classList.remove('was-validated')
         $("#partners-table > tbody").empty()
 
-        if (id == null) {
+        modal.find('#id').val(id)
+        modal.find('#id-profile-photo').val(id)
+
+        let person = await fetchPerson(id)
+        if (person == null) {
             modal.modal()
             return
         }
 
-        let person = await fetchPerson(id)
-
-        modal.find('#id').val(id)
         modal.find('#name').val(person.name)
         modal.find('#residence').val(person.residence)
         modal.find('#gender').val(person.gender)
@@ -582,6 +584,23 @@ window.onload = function() {
             return
         }
 
+        // Submit profile photo
+        console.log("submit profilePhoto")
+        formData = new FormData($('#profile-photo-form')[0])
+        let photoName = await $.ajax({
+            url:'http://localhost:5008/photo_upload',
+            type:'POST',
+            enctype: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            cache: false,
+            data: formData,
+            success:function(response){
+                console.log(response);
+            }
+        });
+
+        // Submit upsertPerson mutation
         let id = form["id"].value || null
         let name = form["name"].value
         let gender = form["gender"].value
@@ -589,6 +608,7 @@ window.onload = function() {
         let deathYear = form["death-year"].value
         let residence = form["residence"].value
         let biography = form["biography"].value
+        let profilePhoto = photoName
         let parents = form["parents"].value
 
         marriages = []
@@ -599,7 +619,7 @@ window.onload = function() {
         })
 
         let result = await upsertPerson(
-            id, name, gender, birthYear, deathYear, residence, biography, parents, marriages
+            id, name, gender, birthYear, deathYear, residence, biography, profilePhoto, parents, marriages
         )
 
         await showPerson(result['id'])

@@ -58,6 +58,22 @@ let clearData = function() {
   data = {}
 }
 
+let generateIdQuery = `query generateIdQuery {
+  generateId {
+    id
+  }
+}
+`
+
+let generateId = async function() {
+  return graph(generateIdQuery)({}).then(function(response) {
+    let result = response['generateId']['id']
+    return result
+  }).catch(function(error) {
+    console.log(error)
+  })
+}
+
 let addPersonToDataset = function(person) {
   var clone = Object.assign({}, person)
   clone.marriages = person.marriages.map(marriage => marriage.id)
@@ -124,6 +140,7 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
   $deathYear: Int,
   $residence: String,
   $biography: String,
+  $profilePhoto: String,
   $parents: String,
   $marriages: [MarriageInput],
 ) {
@@ -135,6 +152,7 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
     deathYear: $deathYear,
     residence: $residence,
     biography: $biography,
+    profilePhoto: $profilePhoto,
     parents: $parents,
     marriages: $marriages
   ) {
@@ -164,7 +182,7 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
   }
 }`
 
-let upsertPerson = async function(id, name, gender, birthYear, deathYear, residence, biography, parents, marriages) {
+let upsertPerson = async function(id, name, gender, birthYear, deathYear, residence, biography, profilePhoto, parents, marriages) {
   let variables = {
     "id": id,
     "name": name,
@@ -173,6 +191,7 @@ let upsertPerson = async function(id, name, gender, birthYear, deathYear, reside
     "deathYear": deathYear || null,
     "residence": residence || null,
     "biography": biography || null,
+    "profilePhoto": profilePhoto || null,
     "parents": parents || null,
     "marriages": marriages || null,
   }
