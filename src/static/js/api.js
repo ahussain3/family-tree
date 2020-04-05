@@ -26,7 +26,7 @@ let searchPersons = function(query, sync, async) {
   })
 }
 
-let personQuery = `query personQuery($id: ID) {
+let personQuery = `query personQuery($id: ID!) {
   person(id: $id) {
     __typename
     id
@@ -117,8 +117,8 @@ let getMarriageDescription = async (id) => {
 
 // TODO(Awais): I should really have fragments or something here
 let upsertPersonMutation = `mutation upsertPersonMutation(
-  $id: ID,
-  $name: String!,
+  $id: ID!,
+  $name: String,
   $gender: Gender!,
   $birthYear: Int,
   $deathYear: Int,

@@ -99,7 +99,7 @@ class AddChildren(gql.Mutation):
 class Query(gql.ObjectType):
     """Top level GraphQL queryable objects"""
     generate_id = gql.Field(GenerateId)
-    person = gql.Field(Person, id=gql.ID())
+    person = gql.Field(Person, id=gql.ID(required=True))
     search_persons = gql.Field(gql.List(Person), name=gql.String())
     search_marriages = gql.Field(gql.List(Marriage), name=gql.String())
 
@@ -206,9 +206,21 @@ def mutate_upsert_person(
     database.delete_marriages(person)  # this seems dangerous?
 
     for marriage in marriages:
+        if id == marriage.partner_b_id:
+            # Should not be possible for a person to be married to themselves.
+            continue
+
         partner_a = person
         partner_b = database.get_node(marriage.partner_b_id)
-        children = [database.get_node(child_id) for child_id in marriage.children]
+
+        # Should not be possible for a person to be their own parent
+        valid_children = [
+            child_id
+            for child_id in marriage.children
+            if child_id not in (id, marriage.partner_b_id)
+        ]
+
+        children = [database.get_node(child_id) for child_id in valid_children]
 
         database.add_marriage(partner_a, partner_b, children)
 
