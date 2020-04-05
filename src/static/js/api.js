@@ -1,5 +1,5 @@
-let BASE_URL = "http://localhost:5008/" // local
-// let BASE_URL ="http://35.242.170.73/"  // prod
+// let BASE_URL = "http://localhost:5008/" // local
+let BASE_URL ="http://35.242.170.73/"  // prod
 let url = BASE_URL + "graphql"
 
 
@@ -26,7 +26,7 @@ let searchPersons = function(query, sync, async) {
   })
 }
 
-let personQuery = `query personQuery($id: ID) {
+let personQuery = `query personQuery($id: ID!) {
   person(id: $id) {
     __typename
     id
@@ -56,6 +56,22 @@ var data = {}
 
 let clearData = function() {
   data = {}
+}
+
+let generateIdQuery = `query generateIdQuery {
+  generateId {
+    id
+  }
+}
+`
+
+let generateId = async function() {
+  return graph(generateIdQuery)({}).then(function(response) {
+    let result = response['generateId']['id']
+    return result
+  }).catch(function(error) {
+    console.log(error)
+  })
 }
 
 let addPersonToDataset = function(person) {
@@ -117,13 +133,14 @@ let getMarriageDescription = async (id) => {
 
 // TODO(Awais): I should really have fragments or something here
 let upsertPersonMutation = `mutation upsertPersonMutation(
-  $id: ID,
-  $name: String!,
+  $id: ID!,
+  $name: String,
   $gender: Gender!,
   $birthYear: Int,
   $deathYear: Int,
   $residence: String,
   $biography: String,
+  $profilePhoto: String,
   $parents: String,
   $marriages: [MarriageInput],
 ) {
@@ -135,6 +152,7 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
     deathYear: $deathYear,
     residence: $residence,
     biography: $biography,
+    profilePhoto: $profilePhoto,
     parents: $parents,
     marriages: $marriages
   ) {
@@ -164,7 +182,7 @@ let upsertPersonMutation = `mutation upsertPersonMutation(
   }
 }`
 
-let upsertPerson = async function(id, name, gender, birthYear, deathYear, residence, biography, parents, marriages) {
+let upsertPerson = async function(id, name, gender, birthYear, deathYear, residence, biography, profilePhoto, parents, marriages) {
   let variables = {
     "id": id,
     "name": name,
@@ -173,6 +191,7 @@ let upsertPerson = async function(id, name, gender, birthYear, deathYear, reside
     "deathYear": deathYear || null,
     "residence": residence || null,
     "biography": biography || null,
+    "profilePhoto": profilePhoto || null,
     "parents": parents || null,
     "marriages": marriages || null,
   }

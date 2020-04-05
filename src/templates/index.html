@@ -25,6 +25,14 @@
         <input type="text" class="typeahead tt-query" id="search-bar" autocomplete="off" spellcheck="false">
     </div>
 
+    <div class="nav-bar top-right">
+      <ul>
+        <li id="create-person">Create Person</li>
+<!--         <li id="login">Login</li>
+        <li id="logout">Logout</li> -->
+      </ul>
+    </div>
+
     <!-- Detail Modal -->
     <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -56,18 +64,25 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-body">
+            <form id="profile-photo-form" method="post" enctype="multipart/form-data">
+              <label> Profile Picture:
+                <input type="hidden" id="id-profile-photo" name="id">
+                <input type="file" accept=".jpg, .jpeg, .png" name="profile_photo" required>
+              </label>
+            </form>
+
             <form id="edit-person-form" autocomplete="off">
-               <input type="hidden" id="id" name="id">
+              <input type="hidden" id="id" name="id">
               <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Full Name" required="">
+                <input type="text" class="form-control" id="name" placeholder="Their full name" required="">
                 <div class="invalid-feedback">
                   Please provide a name.
                 </div>
               </div>
               <div class="form-group">
                 <label for="residence">Place of Residence</label>
-                <input type="text" class="form-control" id="residence" placeholder="Place of Residence">
+                <input type="text" class="form-control" id="residence" placeholder="Where did this person live most of their life?">
               </div>
               <div class="form-group">
                 <label for="gender">Gender</label>
@@ -78,15 +93,15 @@
               </div>
               <div class="form-group">
                 <label for="birth-year">Year of Birth</label>
-                <input type="number" class="form-control" id="birth-year" placeholder="Year of Birth">
+                <input type="number" class="form-control" id="birth-year" placeholder="What year were they born?">
               </div>
               <div class="form-group">
                 <label for="death-year">Year of Death</label>
-                <input type="number" class="form-control" id="death-year" placeholder="Year of Death">
+                <input type="number" class="form-control" id="death-year" placeholder="Leave blank if they are still living">
               </div>
               <div class="form-group">
                 <label for="biography">Biography:</label>
-                <textarea class="form-control" id="biography" rows="3" placeholder="Biography"></textarea>
+                <textarea class="form-control" id="biography" rows="3" placeholder="Tell us a little bit more about them"></textarea>
               </div>
               <div class="form-group">
                 <label for="parents">Parents</label>
@@ -104,7 +119,7 @@
                   <tfoot>
                     <tr>
                         <td colspan="5" style="text-align: left;">
-                            <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+                            <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add a marriage" />
                         </td>
                     </tr>
                   <tr>
@@ -112,7 +127,7 @@
                   </tfoot>
               </table>
 
-              <button type="button" id="submit-edit-form-btn"class="btn btn-primary" data-dismiss="modal">Save</button>
+              <button type="button" id="submit-edit-form-btn" class="btn btn-primary float-right" data-dismiss="modal">Save</button>
             </form>
         </div>
         </div>
@@ -123,8 +138,10 @@
         <div id="canvas"></div>
     </div>
 
-    <div id="clear-canvas">
-      <a id="reset-btn">Clear</a>
+    <div class="nav-bar bottom-left">
+      <ul style="color: FIREBRICK">
+        <li id="reset-btn">Clear</li>
+      </ul>
     </div>
 
     </body>
