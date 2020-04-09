@@ -109,7 +109,7 @@ class Renderer {
             let a = n1 instanceof Marriage ? n1.getHost() : n1
             let b = n2 instanceof Marriage ? n2.getHost() : n2
 
-            return a.birthYear || 0 < b.birthYear || 0 ? -1 : 1
+            return (a.birthYear || 0) < (b.birthYear || 0) ? -1 : 1
         })
 
         // minimize line crossings by positioning items close to their
