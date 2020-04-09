@@ -23,8 +23,9 @@ class Node {
 }
 
 class Person extends Node {
-    constructor(id, gender, birth_year) {
+    constructor(id, name, gender, birth_year) {
         super(id)
+        this.name = name
         this.parents = null
         this.marriages = []
         this.gender = gender
@@ -110,6 +111,8 @@ class Graph {
     }
 
     print() {
-        console.log(this.nodes)
+        var nodes = this.nodes.slice()
+        nodes.sort((a, b) => a.file < b.file ? -1 : 1).sort((a, b) => a.rank < b.rank ? -1 : 1)
+        console.log(nodes.map(n => `${n.name ? n.name.padEnd(15) : "marriage node".padEnd(15)}\trank:${n.rank};\tfile:${n.file};\tx:${n.x};\t${n.y};`).join("\n"))
     }
 }

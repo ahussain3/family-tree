@@ -1,7 +1,4 @@
-console.log("Hello world!!")
-
 window.onload = function() {
-    console.log("Inside the onload!!")
     let pw = 100
     let ph = 230
 
@@ -233,10 +230,6 @@ window.onload = function() {
     }
 
     let render = function() {
-        console.log("APP")
-        console.log(visible)
-        console.log(data)
-
         let pl = visible.size > 0 ? "You can keep searching for more people..." : "Start here by searching for a person..."
         $("#search-bar").attr("placeholder", pl)
 
@@ -554,7 +547,6 @@ window.onload = function() {
     make_person_typeahead($(".children-typeahead"))
 
     let addPartnerRow = function() {
-        console.log("add row")
         newRow=`<tr>
         <td><select class="partner-typeahead" id="partner" style="width: 100%"></select></td>
         <td><select class="children-typeahead" id="children" multiple="multiple" style="width: 120%"></select></td>
@@ -574,7 +566,6 @@ window.onload = function() {
     });
 
     let submitEditPerson = async (event) => {
-        console.log("submitCreatePerson() called")
         let form = document.querySelector("#edit-person-form")
 
         if (form.checkValidity() === false) {
@@ -585,7 +576,6 @@ window.onload = function() {
         }
 
         // Submit profile photo
-        console.log("submit profilePhoto")
         let profilePhotoForm = document.querySelector("#profile-photo-form")
         var photoName = null
 
@@ -598,10 +588,7 @@ window.onload = function() {
                 processData: false,
                 contentType: false,
                 cache: false,
-                data: formData,
-                success:function(response){
-                    console.log(response);
-                }
+                data: formData
             });
         }
 
