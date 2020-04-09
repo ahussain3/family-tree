@@ -10,6 +10,8 @@ average = function(arr) {
     return arr.reduce((a,b) => a + b, 0) / arr.length
 }
 
+DEBUG = false
+
 class Renderer {
     constructor(data, visible) {
         this.g = this.makeGraph(data, visible)
@@ -23,7 +25,7 @@ class Renderer {
         // Create a graph containing all the visible people
         visible.forEach(id => {
             let person = data[id]
-            let personNode = g.addNode(new Person(id, person.gender, person.birthYear))
+            let personNode = g.addNode(new Person(id, person.name, person.gender, person.birthYear))
 
             if (person.marriages.length != 0) {
                 person.marriages.forEach(id => {
@@ -32,7 +34,7 @@ class Renderer {
                     if (visible.has(partnerId)) {
                         let marriageNode = g.addNode(new Marriage(id))
                         let partner = data[partnerId]
-                        let partnerNode = g.addNode(new Person(partnerId, partner.gender, partner.birthYear))
+                        let partnerNode = g.addNode(new Person(partnerId, partner.name, partner.gender, partner.birthYear))
 
                         marriageNode.setPartners(personNode, partnerNode)
                         personNode.addMarriage(marriageNode)
@@ -41,7 +43,7 @@ class Renderer {
                         marriage.children.forEach(childId => {
                             if (visible.has(childId)) {
                                 let child = data[childId]
-                                let childNode = g.addNode(new Person(childId, child.gender, child.birthYear))
+                                let childNode = g.addNode(new Person(childId, child.name, child.gender, child.birthYear))
                                 marriageNode.addChild(childNode)
                                 childNode.setParents(marriageNode)
                             }
@@ -109,7 +111,7 @@ class Renderer {
             let a = n1 instanceof Marriage ? n1.getHost() : n1
             let b = n2 instanceof Marriage ? n2.getHost() : n2
 
-            return a.birthYear || 0 < b.birthYear || 0 ? -1 : 1
+            return (a.birthYear || 0) < (b.birthYear || 0) ? -1 : 1
         })
 
         // minimize line crossings by positioning items close to their
@@ -164,19 +166,18 @@ class Renderer {
                 let rightMostFile = _.max(marriage.children.map(child => child.file))
                 let offset = average([leftMostFile, rightMostFile]) - marriage.file
 
-                // push everything after the marriage node to the right
-                if (offset > 0) {
-                    nodes.slice(nodes.indexOf(marriage) - 1, nodes.length).forEach(node => {
-                        node.file = node.file + offset
-                    })
-                }
+                // need to find all nodes who are siblings of the host of the marriage
+                // and shift them along with the people in the marriage.
+                let siblings = nodes.filter(node => {
+                    return marriage.getHost().parents != null &&
+                    node.parents != null &&
+                    node.parents.id == marriage.getHost().parents.id
+                })
 
-                // push everything before the marriage node to the left
-                if (offset < 0) {
-                    nodes.slice(0, nodes.indexOf(marriage) + 2).forEach(node => {
-                        node.file = node.file + offset
-                    })
-                }
+                let relevantNodes = _.uniq([marriage, ...marriage.partners, ...siblings])
+                relevantNodes.forEach(node => {
+                    node.file = node.file + offset
+                })
             }
         })
     }
@@ -209,7 +210,15 @@ class Renderer {
     setXPositions() {
         let xWidth = 120
         let xOffset = 240
+
         this.g.nodes.forEach(node => node.x = (node.file + node.mod) * xWidth - xOffset)
+    }
+
+    debug(title) {
+        if (DEBUG) {
+            console.log(title)
+            this.g.print()
+        }
     }
 
     render() {
@@ -222,19 +231,29 @@ class Renderer {
         // engine, and reduces scope for bugs elsewhere.
         this.g.nodes.filter(node => node instanceof Marriage).forEach(node => this.computeRank(node, 0))
         this.g.nodes.filter(node => node instanceof Person).forEach(node => this.computeRank(node, 0))
+        this.debug("Compute Ranks")
+
         this.normalizeRanks()
+        this.debug("Normalized Ranks")
+
         this.setYPositions()
+        this.debug("Set Y Positions")
 
         let ranks = _.uniq(this.g.nodes.map(node => node.rank)).sort()
         ranks.forEach(rank => this.orderWithinRank(rank))
-        ranks.reverse().forEach(rank => this.centerOverChildren(rank))
-        this.normalizeFiles()
-        ranks.forEach(rank => this.eliminateOverlaps(rank))
-        this.setXPositions()
+        this.debug("Order Within Ranks")
 
-        console.log("RENDERER")
-        console.log(this.visible)
-        console.log(this.g.nodes)
+        ranks.reverse().forEach(rank => this.centerOverChildren(rank))
+        this.debug("Center over Children")
+
+        this.normalizeFiles()
+        this.debug("Normalize Files")
+
+        ranks.forEach(rank => this.eliminateOverlaps(rank))
+        this.debug("Eliminate Overlaps")
+
+        this.setXPositions()
+        this.debug("Set X Positions")
 
         return this.g.nodes
     }
