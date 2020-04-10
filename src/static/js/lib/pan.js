@@ -62,9 +62,38 @@ class PannableContainer {
         this.content.style.top = (this.contentPosition.y + offsetY).toString() + "px"
     }
 
+    startTouch = (event, value) => {
+        this.container.addEventListener("touchmove", this.trackTouch);
+        let touch = event.touches[0]
+        if (!touch) { return }
+
+        this.startPosition.x = touch.clientX
+        this.startPosition.y = touch.clientY
+        this.contentPosition.x = this.content.offsetLeft
+        this.contentPosition.y = this.content.offsetTop
+    }
+
+    endTouch = (event, value) => {
+        this.container.removeEventListener("touchmove", this.trackTouch);
+        this.startPosition.x = null
+        this.startPosition.y = null
+    }
+
+    trackTouch = (event, value) => {
+        let touch = event.touches[0]
+        if (!touch) { return }
+
+        let offsetX = touch.clientX - this.startPosition.x
+        let offsetY = touch.clientY - this.startPosition.y
+
+        this.content.style.left = (this.contentPosition.x + offsetX).toString() + "px"
+        this.content.style.top = (this.contentPosition.y + offsetY).toString() + "px"
+    }
 
     makePannable = () => {
         this.container.addEventListener("mousedown", this.startPan);
+        this.container.addEventListener("touchstart", this.startTouch);
         this.container.addEventListener("mouseup", this.endPan);
+        this.container.addEventListener("touchend", this.endTouch);
     }
 }
