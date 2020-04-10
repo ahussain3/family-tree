@@ -230,7 +230,7 @@ window.onload = function() {
     }
 
     let render = function() {
-        let pl = visible.size > 0 ? "You can keep searching for more people..." : "Start here by searching for a person..."
+        let pl = visible.size > 0 ? "You can keep searching..." : "Search for a person..."
         $("#search-bar").attr("placeholder", pl)
 
         cc.update(data, visible)
