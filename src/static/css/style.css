@@ -267,3 +267,18 @@ div.modal-dialog {
 p.modal-bio {
     text-align: center;
 }
+
+/* MOBILE */
+
+@media screen and (min-width:320px) and (max-width:640px) {
+  /* for screens that are at least 320 pixels wide but less than or equal to 640 pixels wide */
+    div.modal-header {
+        height: 350px;
+    }
+
+    #search-bar-typeahead {
+        width: 250px;
+        margin-left: -125px;
+        font-size: 5vw;
+    }
+}
