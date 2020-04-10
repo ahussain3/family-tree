@@ -128,7 +128,7 @@ div#canvas {
 div.person {
     position: absolute;
     width: 100px;
-    height: 230px;
+    height: 250px;
     text-align: center;
     border-radius: 5px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
@@ -234,6 +234,7 @@ div.person p {
     line-height: 1em;
     margin-top: 0px;
     margin-bottom: 0.1rem;
+    -webkit-line-clamp: 2; /* number of lines to show */
 }
 
 div.marriage {
