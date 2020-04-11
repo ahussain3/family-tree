@@ -2,6 +2,8 @@ window.onload = function() {
     let pw = 100
     let ph = 250
 
+    let JITTER = false
+
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
 
@@ -56,6 +58,13 @@ window.onload = function() {
         "PARTNERS": "/static/img/icons8-heart-50.png",
         "SIBLINGS": "/static/img/icons8-flow-chart-50.png",
         "CHILDREN": "/static/img/icons8-baby-50.png",
+    }
+
+    let showLegend = function() {
+        let div = document.getElementById("legend")
+        Object.keys(ICONS).forEach(relativeType => {
+            div.innerHTML += `<p><img src='${ICONS[relativeType]}'></img> Show ${relativeType.toLowerCase()}</p>`
+        })
     }
 
     let createShowLink = function(id, relativeType, func) {
@@ -155,7 +164,7 @@ window.onload = function() {
         positionElement(container, x, y)
     }
 
-    let renderLine = function(x1, y1, x2, y2, clearance=30) {
+    let renderLine = function(x1, y1, x2, y2, clearance=40) {
         if (x1 == x2 || y1 == y2) {
             // horizontal or vertical line
             var line = document.createElement("div")
@@ -166,7 +175,7 @@ window.onload = function() {
         }
 
         // render elbowed line
-        let yClearance = ph - clearance
+        let yClearance = ph - (JITTER ? clearance : 40)
         renderLine(x1, y1, x1, y1 + yClearance)
         renderLine(x1, y1 + yClearance, x2, y1 + yClearance)
         renderLine(x2, y1 + yClearance, x2, y2)
@@ -179,7 +188,7 @@ window.onload = function() {
         renderLine(partnerLeft.x + pw / 2, partnerLeft.y - ph / 4, partnerRight.x - pw / 2, partnerRight.y - ph / 4)
     }
 
-    let renderChildLine = function(marriageNode, childNode, clearance=30) {
+    let renderChildLine = function(marriageNode, childNode, clearance=40) {
         renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2, clearance)
     }
 
@@ -266,6 +275,8 @@ window.onload = function() {
         if (visible.size > 0) {
            changeFocus(visible.values().next().value)
         }
+
+        showLegend()
     }
 
     main()

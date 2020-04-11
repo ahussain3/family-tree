@@ -24,6 +24,7 @@ safeMax = function(arr) {
 
 DEBUG = false
 
+
 class Renderer {
     constructor(data, visible) {
         this.g = this.makeGraph(data, visible)
