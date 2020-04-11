@@ -71,6 +71,23 @@ class Renderer {
         return node.rank != null
     }
 
+    getHost(marriage) {
+        // The male determines where the marriage gets rendered, except if the // male's parents not on screen, in which case the female determines
+        // where the marriage is rendered. I don't make the rules. :shrugs:
+        assert(marriage.partners.length == 2)
+        let a = marriage.partners[0]
+        let b = marriage.partners[1]
+
+        let aParentsAreVisible = a.parents && this.visible.has(a.parents.partners[0].id)
+        let bParentsAreVisible = b.parents && this.visible.has(b.parents.partners[0].id)
+
+        if (aParentsAreVisible == bParentsAreVisible) {
+            return a.isMale() ? a : b
+        }
+
+        return aParentsAreVisible ? a : b
+    }
+
     // Recursively go through and calculate the rank of this person, and any
     // children, parents, or partners they might have.
     computeRank(node, rank) {
@@ -82,7 +99,11 @@ class Renderer {
 
         if (node instanceof Person) {
             // set rank for marriages
-            node.marriages.forEach(marriage => this.computeRank(marriage, rank))
+            node.marriages.forEach(marriage => {
+                if (this.getHost(marriage) == node) {
+                    this.computeRank(marriage, rank)}
+                })
+
             // set rank for parents
             if (node.parents) { this.computeRank(node.parents, rank - 1)}
         }
@@ -102,23 +123,35 @@ class Renderer {
         })
     }
 
+    // siblingGroup = {
+    //     parents_id = "",
+    //     siblings = List[Node]
+    // }
+
     orderWithinRank(rank) {
         let nodes = this.g.nodes.filter(node => node.rank == rank)
         let counter = 0
 
+        // group according to marriages
+
+        // group into groups of siblings
+
+        // fixed gap between married partners
+        // minimum gap between groups of siblings
+
         // show the oldest person on the left
         nodes.sort((n1, n2) => {
-            let a = n1 instanceof Marriage ? n1.getHost() : n1
-            let b = n2 instanceof Marriage ? n2.getHost() : n2
+            let a = n1 instanceof Marriage ? this.getHost(n1) : n1
+            let b = n2 instanceof Marriage ? this.getHost(n2) : n2
 
             return (a.birthYear || 0) < (b.birthYear || 0) ? -1 : 1
         })
 
-        // minimize line crossings by positioning items close to their
-        // counterparts on different levels
+        // minimize line crossings by positioning groups of direct siblings
+        // close to their counterparts on different levels
         nodes.sort((n1, n2) => {
-            let a = n1 instanceof Marriage ? n1.getHost() : n1
-            let b = n2 instanceof Marriage ? n2.getHost() : n2
+            let a = n1 instanceof Marriage ? this.getHost(n1) : n1
+            let b = n2 instanceof Marriage ? this.getHost(n2) : n2
 
             let aParents = a.parents ? a.parents.file : undefined
             let bParents = b.parents ? b.parents.file : undefined
@@ -134,12 +167,12 @@ class Renderer {
         let marriages = nodes.filter(node => node instanceof Marriage)
         let partners = _.flatten(marriages.map(marriage => marriage.partners))
 
-        // remove any persons who are in a marriage
+        // remove any persons who are in a marriage.
         nodes = nodes.filter(node => !partners.includes(node))
 
         // add back in any persons in a marriage (in the correct place)
         marriages.forEach(marriage => {
-            let partners = marriage.partners.sort(p => p.isMale() ? 1 : -1)
+            let partners = marriage.partners.sort(p => p.isMale() ? -1 : 1)
             nodes.insertBefore(partners[0], marriage)
             nodes.insertAfter(partners[1], marriage)
         })
@@ -170,9 +203,9 @@ class Renderer {
                 // need to find all nodes who are siblings of the host of the marriage
                 // and shift them along with the people in the marriage.
                 let siblings = nodes.filter(node => {
-                    return marriage.getHost().parents != null &&
+                    return this.getHost(marriage).parents != null &&
                     node.parents != null &&
-                    node.parents.id == marriage.getHost().parents.id
+                    node.parents.id == this.getHost(marriage).parents.id
                 })
 
                 let relevantNodes = _.uniq([marriage, ...marriage.partners, ...siblings])

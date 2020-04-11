@@ -6,8 +6,8 @@ function assert(condition, message) {
 }
 
 const gender = {
-    MALE: 'M',
-    FEMALE: 'F',
+    MALE: 'MALE',
+    FEMALE: 'FEMALE',
 }
 
 class Node {
@@ -75,14 +75,6 @@ class Marriage extends Node {
             return
         }
         this.children.push(node)
-    }
-
-    getHost() {
-        assert(this.partners.length == 2)
-        let a = this.partners[0]
-        let b = this.partners[1]
-        // This might not be correct. Doesn't host also depend on what else is visible?
-        return a.isMale() ? a : b
     }
 }
 
