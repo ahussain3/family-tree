@@ -1,6 +1,6 @@
 window.onload = function() {
     let pw = 100
-    let ph = 230
+    let ph = 250
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
@@ -216,7 +216,7 @@ window.onload = function() {
             if (item instanceof Marriage) {
                 renderMarriage(item.id, item.x, item.y)
                 renderMarriageLine(item)
-                let clearance = Math.random() * (35 - 25) + 25
+                let clearance = Math.random() * (45 - 35) + 35
                 item.children.forEach(child => {
                     renderChildLine(item, child, clearance=clearance)
                 })

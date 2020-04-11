@@ -10,6 +10,18 @@ average = function(arr) {
     return arr.reduce((a,b) => a + b, 0) / arr.length
 }
 
+// So annoying that I have to do this!
+safeMin = function(arr) {
+    if (arr == []) { return 0 }
+    return _.min(arr)
+}
+
+safeMax = function(arr) {
+    if (arr == []) { return 0 }
+    return _.max(arr)
+}
+
+
 DEBUG = true
 
 class Renderer {
@@ -117,7 +129,7 @@ class Renderer {
     }
 
     normalizeRanks() {
-        let min = _.min(this.g.nodes.map(node => node.rank).concat([0]))
+        let min = safeMin(this.g.nodes.map(node => node.rank))
         this.g.nodes.forEach(node => {
             node.rank = node.rank - min
         })
@@ -207,7 +219,7 @@ class Renderer {
 
         let partners = [person, ...siblings].flatMap(p => p.marriages.flatMap(m => [m, ...m.partners]))
 
-        return _.uniq([...siblings, ...partners])
+        return _.uniq([person, ...siblings, ...partners])
     }
 
     centerChildren(rank) {
@@ -219,8 +231,8 @@ class Renderer {
         marriages.forEach(marriage => {
             if (marriage.children.length != 0) {
                 let siblingGroup = this.siblingGroup(marriage.children[0])
-                let leftMost = _.min(siblingGroup.map(child => child.file))
-                let rightMost = _.max(siblingGroup.map(child => child.file))
+                let leftMost = safeMin(siblingGroup.map(child => child.file))
+                let rightMost = safeMax(siblingGroup.map(child => child.file))
                 let offset = marriage.file - average([leftMost, rightMost])
 
                 let nodesToOffset = marriage.children.flatMap(child => {
@@ -240,8 +252,8 @@ class Renderer {
         marriages.forEach(marriage => {
             if (marriage.children.length != 0) {
                 let siblingGroup = this.siblingGroup(marriage.children[0])
-                let leftMost = _.min(siblingGroup.map(child => child.file))
-                let rightMost = _.max(siblingGroup.map(child => child.file))
+                let leftMost = safeMin(siblingGroup.map(child => child.file))
+                let rightMost = safeMax(siblingGroup.map(child => child.file))
                 let offset = marriage.file - average([leftMost, rightMost])
 
                 this.siblingGroup(this.getHost(marriage)).forEach(node => {
@@ -254,9 +266,9 @@ class Renderer {
     eliminateOverlaps(rank) {
         // For each rank goes left to right and "pushes" nodes to the right
         // in order to remove overlaps.
-        let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
+        let nodes = _.sortBy(this.g.nodes.filter(node => node instanceof Person && node.rank == rank), node => node.file)
         for (var i = 1; i < nodes.length; i++) {
-            if (nodes[i].file < nodes[i-1].file + 0.6) {
+            if (nodes[i].file <= nodes[i-1].file + 0.8) {
                 // we have an overlap
                 let mod = nodes[i-1].file - nodes[i].file + 1
                 nodes.slice(i, nodes.length).forEach(node => node.mod += mod)
@@ -266,7 +278,7 @@ class Renderer {
 
     normalizeFiles() {
         // adds the same value to every node so that none have a negative file.
-        let min = _.min(this.g.nodes.map(node => node.file).concat([0]))
+        let min = safeMin(this.g.nodes.map(node => node.file))
         this.g.nodes.forEach(node => {
             node.file = node.file - min
         })
@@ -299,8 +311,8 @@ class Renderer {
         let ranks = _.uniq(this.g.nodes.map(node => node.rank)).sort()
         ranks.forEach(rank => {
             let nodes = this.g.nodes.filter(node => node.rank == rank)
-            let max = _.max(nodes.map(node => node.file))
-            let min = _.min(nodes.map(node => node.file))
+            let max = safeMax(nodes.map(node => node.file))
+            let min = safeMin(nodes.map(node => node.file))
             let width = max - min
             if (width > maxWidth) {
                 maxWidth = width
@@ -330,16 +342,17 @@ class Renderer {
         this.debug("Order Within Ranks")
 
         let widestRank = this.findWidestRank()
-        this.debug(`widestRank: ${widestRank}`)
+        console.log("widest rank", widestRank)
         ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
-        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
         this.debug("Center Children")
+        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
+        this.debug("Center Over Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
 
-        // ranks.forEach(rank => this.eliminateOverlaps(rank))
-        // this.debug("Eliminate Overlaps")
+        ranks.forEach(rank => this.eliminateOverlaps(rank))
+        this.debug("Eliminate Overlaps")
 
         this.setXPositions()
         this.debug("Set X Positions")
