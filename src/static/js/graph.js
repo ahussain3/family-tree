@@ -76,6 +76,14 @@ class Marriage extends Node {
         }
         this.children.push(node)
     }
+
+    otherPartner(node) {
+        return this.partners.filter(partner => partner != node)[0]
+    }
+
+    desc() {
+        return this.partners.map(p => p.name).join(" + ")
+    }
 }
 
 class Graph {

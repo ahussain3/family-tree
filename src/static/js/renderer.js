@@ -188,35 +188,54 @@ class Renderer {
         }
     }
 
-    centerOverChildren(rank) {
+    addOffset(person, offset) {
+        // recursively adds a (file) offset to the node. Thus moving them plus
+        // all their partners and children left/right by the same amount.
+        person.file = person.file + offset
+
+        person.marriages.forEach(marriage => {
+            marriage.file = marriage.file + offset
+            let partner = marriage.otherPartner(person)
+            partner.file = partner.file + offset
+
+            marriage.children.forEach(child => {
+                this.addOffset(child, offset)
+            })
+        })
+    }
+
+    centerChildren(rank) {
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
         let marriages = nodes.filter(node => node instanceof Marriage)
+        // debugger
 
-        // find the marriage nodes
-        // center the marriage node over its children
+        // find the marriage nodes. center the children over the marriage node
         marriages.forEach(marriage => {
+            // debugger
             if (marriage.children.length != 0) {
                 let leftMostFile = _.min(marriage.children.map(child => child.file))
                 let rightMostFile = _.max(marriage.children.map(child => child.file))
-                let offset = average([leftMostFile, rightMostFile]) - marriage.file
+                let offset = marriage.file - average([leftMostFile, rightMostFile])
 
-                // need to find all nodes who are siblings of the host of the marriage
-                // and shift them along with the people in the marriage.
-                let siblings = nodes.filter(node => {
-                    return this.getHost(marriage).parents != null &&
-                    node.parents != null &&
-                    node.parents.id == this.getHost(marriage).parents.id
+                // debugger
+                console.log(marriage.partners.map(x=>x.name).join("+"))
+                console.log(marriage.children.map(x=>x.file))
+
+                marriage.children.forEach(child => {
+                    this.addOffset(child, offset)
                 })
 
-                let relevantNodes = _.uniq([marriage, ...marriage.partners, ...siblings])
-                relevantNodes.forEach(node => {
-                    node.file = node.file + offset
-                })
+                console.log(marriage.partners.map(x=>x.name).join("+"))
+                console.log(marriage.children.map(x=>x.file))
+
+                // debugger
             }
         })
     }
 
     eliminateOverlaps(rank) {
+        // For each rank goes left to right and "pushes" nodes to the right
+        // in order to remove overlaps.
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
         for (var i = 1; i < nodes.length; i++) {
             if (nodes[i].file < nodes[i-1].file + 0.6) {
@@ -228,6 +247,7 @@ class Renderer {
     }
 
     normalizeFiles() {
+        // adds the same value to every node so that none have a negative file.
         let min = _.min(this.g.nodes.map(node => node.file).concat([0]))
         this.g.nodes.forEach(node => {
             node.file = node.file - min
@@ -274,14 +294,14 @@ class Renderer {
         ranks.forEach(rank => this.orderWithinRank(rank))
         this.debug("Order Within Ranks")
 
-        ranks.reverse().forEach(rank => this.centerOverChildren(rank))
-        this.debug("Center over Children")
+        ranks.reverse().forEach(rank => this.centerChildren(rank))
+        this.debug("Center Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
 
-        ranks.forEach(rank => this.eliminateOverlaps(rank))
-        this.debug("Eliminate Overlaps")
+        // ranks.forEach(rank => this.eliminateOverlaps(rank))
+        // this.debug("Eliminate Overlaps")
 
         this.setXPositions()
         this.debug("Set X Positions")
