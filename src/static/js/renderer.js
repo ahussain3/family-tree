@@ -10,7 +10,7 @@ average = function(arr) {
     return arr.reduce((a,b) => a + b, 0) / arr.length
 }
 
-DEBUG = false
+DEBUG = true
 
 class Renderer {
     constructor(data, visible) {
@@ -139,8 +139,9 @@ class Renderer {
 
         // add back in any persons in a marriage (in the correct place)
         marriages.forEach(marriage => {
-            nodes.insertBefore(marriage.partners[0], marriage)
-            nodes.insertAfter(marriage.partners[1], marriage)
+            let partners = marriage.partners.sort(p => p.isMale() ? 1 : -1)
+            nodes.insertBefore(partners[0], marriage)
+            nodes.insertAfter(partners[1], marriage)
         })
 
         for (var i = 0; i < nodes.length; i++) {
@@ -204,14 +205,14 @@ class Renderer {
         let yWidth = 290
         let yOffset = 210
 
-        this.g.nodes.forEach(node => node.y = node.rank * yWidth - yOffset)
+        this.g.nodes.forEach(node => node.y = Math.round(node.rank * yWidth - yOffset))
     }
 
     setXPositions() {
         let xWidth = 120
         let xOffset = 240
 
-        this.g.nodes.forEach(node => node.x = (node.file + node.mod) * xWidth - xOffset)
+        this.g.nodes.forEach(node => node.x = Math.round((node.file + node.mod) * xWidth - xOffset))
     }
 
     debug(title) {
@@ -236,9 +237,6 @@ class Renderer {
         this.normalizeRanks()
         this.debug("Normalized Ranks")
 
-        this.setYPositions()
-        this.debug("Set Y Positions")
-
         let ranks = _.uniq(this.g.nodes.map(node => node.rank)).sort()
         ranks.forEach(rank => this.orderWithinRank(rank))
         this.debug("Order Within Ranks")
@@ -254,6 +252,9 @@ class Renderer {
 
         this.setXPositions()
         this.debug("Set X Positions")
+
+        this.setYPositions()
+        this.debug("Set Y Positions")
 
         return this.g.nodes
     }

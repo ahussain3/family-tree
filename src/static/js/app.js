@@ -484,9 +484,7 @@ window.onload = function() {
 
     initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
 
-
-// Modal pop up (I really need this to be its own component
-
+    // Modal pop up (I really need this to be its own component
     let make_person_typeahead = function(element) {
         element.select2({
           minimumInputLength: 2,
@@ -614,6 +612,7 @@ window.onload = function() {
             id, name, gender, birthYear, deathYear, residence, biography, profilePhoto, parents, marriages
         )
 
+        await _fetchPerson(result['id']) // force refetch of the person's data
         await showPerson(result['id'])
         render()
     }
