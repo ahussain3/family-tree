@@ -22,7 +22,7 @@ safeMax = function(arr) {
 }
 
 
-DEBUG = true
+DEBUG = false
 
 class Renderer {
     constructor(data, visible) {
@@ -223,7 +223,6 @@ class Renderer {
     }
 
     centerChildren(rank) {
-        console.log("Center Children for Rank", rank)
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
         let marriages = nodes.filter(node => node instanceof Marriage)
 
@@ -244,7 +243,6 @@ class Renderer {
     }
 
     centerOverChildren(rank) {
-        console.log("Center Over Children for Rank", rank)
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
         let marriages = nodes.filter(node => node instanceof Marriage)
 
@@ -342,7 +340,6 @@ class Renderer {
         this.debug("Order Within Ranks")
 
         let widestRank = this.findWidestRank()
-        console.log("widest rank", widestRank)
         ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
         this.debug("Center Children")
         ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
