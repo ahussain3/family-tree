@@ -155,7 +155,7 @@ window.onload = function() {
         positionElement(container, x, y)
     }
 
-    let renderLine = function(x1, y1, x2, y2) {
+    let renderLine = function(x1, y1, x2, y2, clearance=30) {
         if (x1 == x2 || y1 == y2) {
             // horizontal or vertical line
             var line = document.createElement("div")
@@ -166,7 +166,7 @@ window.onload = function() {
         }
 
         // render elbowed line
-        let yClearance = ph - 30
+        let yClearance = ph - clearance
         renderLine(x1, y1, x1, y1 + yClearance)
         renderLine(x1, y1 + yClearance, x2, y1 + yClearance)
         renderLine(x2, y1 + yClearance, x2, y2)
@@ -179,8 +179,8 @@ window.onload = function() {
         renderLine(partnerLeft.x + pw / 2, partnerLeft.y - ph / 4, partnerRight.x - pw / 2, partnerRight.y - ph / 4)
     }
 
-    let renderChildLine = function(marriageNode, childNode) {
-        renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2)
+    let renderChildLine = function(marriageNode, childNode, clearance=30) {
+        renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2, clearance)
     }
 
     let preprocessVisible = function(visible) {
@@ -216,8 +216,9 @@ window.onload = function() {
             if (item instanceof Marriage) {
                 renderMarriage(item.id, item.x, item.y)
                 renderMarriageLine(item)
+                let clearance = Math.random() * (35 - 25) + 25
                 item.children.forEach(child => {
-                    renderChildLine(item, child)
+                    renderChildLine(item, child, clearance=clearance)
                 })
             }
         })
