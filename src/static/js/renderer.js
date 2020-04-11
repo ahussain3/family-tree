@@ -201,12 +201,13 @@ class Renderer {
         let siblings = this.g.nodes.filter(node => {
             return person.parents != null &&
             node.parents != null &&
+            node != person &&
             node.parents.id == person.parents.id
         })
 
-        let partners = siblings.flatMap(p => p.marriages.flatMap(m => m.partners))
+        let partners = [person, ...siblings].flatMap(p => p.marriages.flatMap(m => [m, ...m.partners]))
 
-        return _.uniq(siblings.concat(partners))
+        return _.uniq([...siblings, ...partners])
     }
 
     centerChildren(rank) {
@@ -231,10 +232,11 @@ class Renderer {
     }
 
     centerOverChildren(rank) {
+        console.log("Center Over Children for Rank", rank)
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
         let marriages = nodes.filter(node => node instanceof Marriage)
 
-        // find the marriage nodes and center it over its children
+        // find the marriage node and center it over its children
         marriages.forEach(marriage => {
             if (marriage.children.length != 0) {
                 let siblingGroup = this.siblingGroup(marriage.children[0])
@@ -242,17 +244,7 @@ class Renderer {
                 let rightMost = _.max(siblingGroup.map(child => child.file))
                 let offset = marriage.file - average([leftMost, rightMost])
 
-                // need to find all nodes who are siblings of the host of the
-                // marriage and shift them along with the people in the
-                // marriage.
-                // let siblings = nodes.filter(node => {
-                //     return this.getHost(marriage).parents != null &&
-                //     node.parents != null &&
-                //     node.parents.id == this.getHost(marriage).parents.id
-                // })
-
-                let relevantNodes = _.uniq([marriage, ...marriage.partners])
-                relevantNodes.forEach(node => {
+                this.siblingGroup(this.getHost(marriage)).forEach(node => {
                     node.file = node.file - offset
                 })
             }
@@ -338,11 +330,10 @@ class Renderer {
         this.debug("Order Within Ranks")
 
         let widestRank = this.findWidestRank()
-        console.log("widestRank", widestRank)
-        this.centerChildren(2)
-        // ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
-        // ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
-        // this.debug("Center Children")
+        this.debug(`widestRank: ${widestRank}`)
+        ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
+        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
+        this.debug("Center Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
