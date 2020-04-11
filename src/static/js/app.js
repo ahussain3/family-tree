@@ -1,6 +1,6 @@
 window.onload = function() {
     let pw = 100
-    let ph = 230
+    let ph = 250
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
@@ -155,7 +155,7 @@ window.onload = function() {
         positionElement(container, x, y)
     }
 
-    let renderLine = function(x1, y1, x2, y2) {
+    let renderLine = function(x1, y1, x2, y2, clearance=30) {
         if (x1 == x2 || y1 == y2) {
             // horizontal or vertical line
             var line = document.createElement("div")
@@ -166,7 +166,7 @@ window.onload = function() {
         }
 
         // render elbowed line
-        let yClearance = ph - 30
+        let yClearance = ph - clearance
         renderLine(x1, y1, x1, y1 + yClearance)
         renderLine(x1, y1 + yClearance, x2, y1 + yClearance)
         renderLine(x2, y1 + yClearance, x2, y2)
@@ -179,8 +179,8 @@ window.onload = function() {
         renderLine(partnerLeft.x + pw / 2, partnerLeft.y - ph / 4, partnerRight.x - pw / 2, partnerRight.y - ph / 4)
     }
 
-    let renderChildLine = function(marriageNode, childNode) {
-        renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2)
+    let renderChildLine = function(marriageNode, childNode, clearance=30) {
+        renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2, clearance)
     }
 
     let preprocessVisible = function(visible) {
@@ -216,8 +216,9 @@ window.onload = function() {
             if (item instanceof Marriage) {
                 renderMarriage(item.id, item.x, item.y)
                 renderMarriageLine(item)
+                let clearance = Math.random() * (45 - 35) + 35
                 item.children.forEach(child => {
-                    renderChildLine(item, child)
+                    renderChildLine(item, child, clearance=clearance)
                 })
             }
         })
@@ -484,9 +485,7 @@ window.onload = function() {
 
     initTypeahead("#search-bar-typeahead", searchPersons, selectPerson, "name")
 
-
-// Modal pop up (I really need this to be its own component
-
+    // Modal pop up (I really need this to be its own component
     let make_person_typeahead = function(element) {
         element.select2({
           minimumInputLength: 2,
@@ -614,6 +613,7 @@ window.onload = function() {
             id, name, gender, birthYear, deathYear, residence, biography, profilePhoto, parents, marriages
         )
 
+        await _fetchPerson(result['id']) // force refetch of the person's data
         await showPerson(result['id'])
         render()
     }

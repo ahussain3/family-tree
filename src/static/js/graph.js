@@ -6,8 +6,8 @@ function assert(condition, message) {
 }
 
 const gender = {
-    MALE: 'M',
-    FEMALE: 'F',
+    MALE: 'MALE',
+    FEMALE: 'FEMALE',
 }
 
 class Node {
@@ -77,12 +77,12 @@ class Marriage extends Node {
         this.children.push(node)
     }
 
-    getHost() {
-        assert(this.partners.length == 2)
-        let a = this.partners[0]
-        let b = this.partners[1]
-        // This might not be correct. Doesn't host also depend on what else is visible?
-        return a.isMale() ? a : b
+    otherPartner(node) {
+        return this.partners.filter(partner => partner != node)[0]
+    }
+
+    desc() {
+        return this.partners.map(p => p.name).join(" + ")
     }
 }
 
@@ -113,6 +113,6 @@ class Graph {
     print() {
         var nodes = this.nodes.slice()
         nodes.sort((a, b) => a.file < b.file ? -1 : 1).sort((a, b) => a.rank < b.rank ? -1 : 1)
-        console.log(nodes.map(n => `${n.name ? n.name.padEnd(15) : "marriage node".padEnd(15)}\trank:${n.rank};\tfile:${n.file};\tx:${n.x};\t${n.y};`).join("\n"))
+        console.log(nodes.map(n => `${n.name ? n.name.padEnd(15) : "marriage node".padEnd(15)}\trank:${n.rank != null ? n.rank.toFixed(1) : null}\tfile:${n.file != null ? n.file.toFixed(1) : null}\tx:${n.x}\t\ty:${n.y}`).join("\n"))
     }
 }
