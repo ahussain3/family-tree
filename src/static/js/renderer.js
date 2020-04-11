@@ -128,6 +128,29 @@ class Renderer {
     //     siblings = List[Node]
     // }
 
+    // class Group {
+    // }
+
+    // class Node extends Group {
+
+    // }
+
+    // class Marriage extends Group {
+    //     partner_a: Node
+    //     marrige_node: Node
+    //     partner_b: Node
+
+    // }
+
+    // class Siblings extends Group {
+    //     siblings: List[Group]
+
+    // }
+
+    // groupWithinRank(rank) {
+    //     let nodes = this.g.nodes.filter(node => node.rank == rank)
+    // }
+
     orderWithinRank(rank) {
         let nodes = this.g.nodes.filter(node => node.rank == rank)
         let counter = 0
@@ -163,7 +186,7 @@ class Renderer {
             return aParents < bParents ? -1 : 1
         })
 
-        // group people so that marriaged people stay close together
+        // group people so that married people stay close together
         let marriages = nodes.filter(node => node instanceof Marriage)
         let partners = _.flatten(marriages.map(marriage => marriage.partners))
 
@@ -204,31 +227,35 @@ class Renderer {
         })
     }
 
+    siblingGroup(person) {
+        // returns a list of nodes for people who are in the "sibling group"
+        // for this person, namely that they are siblings, or are married to // siblings.
+        let siblings = this.g.nodes.filter(node => {
+            return person.parents != null &&
+            node.parents != null &&
+            node.parents.id == person.parents.id
+        })
+
+        let partners = siblings.flatMap(p => p.marriages.flatMap(m => m.partners))
+
+        return _.uniq(siblings.concat(partners))
+    }
+
     centerChildren(rank) {
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
         let marriages = nodes.filter(node => node instanceof Marriage)
-        // debugger
 
         // find the marriage nodes. center the children over the marriage node
         marriages.forEach(marriage => {
-            // debugger
             if (marriage.children.length != 0) {
-                let leftMostFile = _.min(marriage.children.map(child => child.file))
-                let rightMostFile = _.max(marriage.children.map(child => child.file))
-                let offset = marriage.file - average([leftMostFile, rightMostFile])
-
-                // debugger
-                console.log(marriage.partners.map(x=>x.name).join("+"))
-                console.log(marriage.children.map(x=>x.file))
+                let siblingGroup = this.siblingGroup(marriage.children[0])
+                let leftMost = _.min(siblingGroup.map(child => child.file))
+                let rightMost = _.max(siblingGroup.map(child => child.file))
+                let offset = marriage.file - average([leftMost, rightMost])
 
                 marriage.children.forEach(child => {
                     this.addOffset(child, offset)
                 })
-
-                console.log(marriage.partners.map(x=>x.name).join("+"))
-                console.log(marriage.children.map(x=>x.file))
-
-                // debugger
             }
         })
     }
