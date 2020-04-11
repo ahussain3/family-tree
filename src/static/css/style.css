@@ -91,6 +91,11 @@ div.bottom-left {
     bottom: 0;
 }
 
+div.bottom-right {
+    right: 0;
+    bottom: 0;
+}
+
 div.top-right {
     top: 0;
     right: 0;
@@ -116,6 +121,25 @@ div.nav-bar li {
 
 div.nav-bar li:hover {
     font-weight: bold;
+}
+
+div#legend {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    padding: 30px;
+    text-align: right;
+    opacity: 0.7;
+    z-index: 99;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+}
+
+div#legend img {
+    padding: 4px;
+    max-width: 30px;
 }
 
 div#canvas {
