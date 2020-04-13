@@ -190,24 +190,6 @@ class Renderer {
         }
     }
 
-    recursivelyGetChildren(person) {
-        // recursively gets all children and partners for a specific node.
-        let recurse = (person) => {
-            var result = [person]
-            person.marriages.forEach(marriage => {
-                result.push(marriage)
-                result.push(...marriage.partners)
-
-                marriage.children.forEach(child => {
-                    result.push(...recurse(child))
-                })
-            })
-            return result
-        }
-
-        return _.uniq(recurse(person))
-    }
-
     siblingGroup(person) {
         // returns a list of nodes for people who are in the "sibling group"
         // for this person, namely that they are siblings, or are married to // their siblings.
@@ -240,9 +222,9 @@ class Renderer {
     centerChildren(rank) {
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
 
-        // go through the rank, left to right, and identify any sibling groups
-        // only hosts of marriages are in the sibling group
-        // someone who doesn't have parents is in their own sibling group
+        // go through the rank, left to right, and identify any sibling groups.
+        // Only hosts of marriages are in the sibling group someone who
+        // doesn't have parents is in their own sibling group
         let groups = this.groupBy(nodes, node => {
             var votingNode = null
             if (node instanceof Marriage) {
@@ -266,9 +248,10 @@ class Renderer {
             let parents = this.g.get(parents_id)
             let leftMost = safeMin(group.map(child => child.file))
             let rightMost = safeMax(group.map(child => child.file))
-            let offset = parents.file - average([leftMost, rightMost])
+            let offset = _.max([0, parents.file - average([leftMost, rightMost])])
 
-            // center the sibling group over the parents by nudging all subsequent nodes to the right.
+            // center the sibling group over the parents, while avoiding
+            // overlaps.
             group.forEach(node => node.file = node.file + offset + mod)
             mod += offset
         }
