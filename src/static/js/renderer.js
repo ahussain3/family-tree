@@ -223,24 +223,55 @@ class Renderer {
         return _.uniq([person, ...siblings, ...partners])
     }
 
+    groupBy(list, iteratee) {
+        const map = new Map();
+        list.forEach((item) => {
+             const key = iteratee(item);
+             const collection = map.get(key);
+             if (!collection) {
+                 map.set(key, [item]);
+             } else {
+                 collection.push(item);
+             }
+        });
+        return map;
+    }
+
     centerChildren(rank) {
         let nodes = _.sortBy(this.g.nodes.filter(node => node.rank == rank), node => node.file)
-        let marriages = nodes.filter(node => node instanceof Marriage)
 
-        // find the marriage nodes. center the children over the marriage node
-        marriages.forEach(marriage => {
-            if (marriage.children.length != 0) {
-                let siblingGroup = this.siblingGroup(marriage.children[0])
-                let leftMost = safeMin(siblingGroup.map(child => child.file))
-                let rightMost = safeMax(siblingGroup.map(child => child.file))
-                let offset = marriage.file - average([leftMost, rightMost])
-
-                let nodesToOffset = marriage.children.flatMap(child => {
-                    return this.recursivelyGetChildren(child)
-                })
-                _.uniq(nodesToOffset).forEach(node => node.file = node.file + offset)
+        // go through the rank, left to right, and identify any sibling groups
+        // only hosts of marriages are in the sibling group
+        // someone who doesn't have parents is in their own sibling group
+        let groups = this.groupBy(nodes, node => {
+            var votingNode = null
+            if (node instanceof Marriage) {
+                votingNode = this.getHost(node)
+            } else if (node.isMarried()) {
+                votingNode = this.getHost(node.marriages[0])
+            } else {
+                votingNode = node
             }
+
+            if (votingNode.parents == null) { return `noparents_${votingNode.id}` }
+            return votingNode.parents.id
         })
+
+        // for each sibling group, identify who the parents are
+        let mod = 0
+        for (let [parents_id, group] of groups) {
+            if (parents_id.startsWith("noparents")) {
+                group.forEach(node => node.file = node.file + mod)
+            }
+            let parents = this.g.get(parents_id)
+            let leftMost = safeMin(group.map(child => child.file))
+            let rightMost = safeMax(group.map(child => child.file))
+            let offset = parents.file - average([leftMost, rightMost])
+
+            // center the sibling group over the parents by nudging all subsequent nodes to the right.
+            group.forEach(node => node.file = node.file + offset + mod)
+            mod += offset
+        }
     }
 
     centerOverChildren(rank) {
@@ -340,11 +371,12 @@ class Renderer {
         ranks.forEach(rank => this.orderWithinRank(rank))
         this.debug("Order Within Ranks")
 
-        let widestRank = this.findWidestRank()
-        ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
-        this.debug("Center Children")
-        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
-        this.debug("Center Over Children")
+        this.centerChildren(2)
+        // let widestRank = this.findWidestRank()
+        // ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
+        // this.debug("Center Children")
+        // ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
+        // this.debug("Center Over Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
