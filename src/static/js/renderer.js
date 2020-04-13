@@ -371,12 +371,12 @@ class Renderer {
         ranks.forEach(rank => this.orderWithinRank(rank))
         this.debug("Order Within Ranks")
 
-        this.centerChildren(2)
-        // let widestRank = this.findWidestRank()
-        // ranks.filter(rank => rank >= widestRank).forEach(rank => this.centerChildren(rank))
-        // this.debug("Center Children")
-        // ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
-        // this.debug("Center Over Children")
+        let widestRank = this.findWidestRank()
+        console.log("widestRank", widestRank)
+        ranks.filter(rank => rank > widestRank).forEach(rank => this.centerChildren(rank))
+        this.debug("Center Children")
+        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
+        this.debug("Center Over Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
