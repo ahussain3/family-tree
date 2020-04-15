@@ -231,7 +231,6 @@ class Renderer {
         // returns a list of nodes for people who are in the "sibling group"
         // for this person, namely that they are siblings, or are married to // their siblings.
         let parentsId = this.getParentsId(person)
-
         let group = this.g.nodes.filter(node => {
             return this.getParentsId(node) == parentsId
         })
@@ -273,6 +272,8 @@ class Renderer {
         let marriages = nodes.filter(node => node instanceof Marriage)
 
         // find the marriage node and center it over its children
+        // don't move marriage nodes which have already been positioned
+        let alreadyPositioned = []
         marriages.forEach(marriage => {
             if (marriage.children.length != 0) {
                 let childrenGroup = this.siblingGroup(marriage.children[0])
@@ -281,8 +282,15 @@ class Renderer {
                 let offset = average([leftMost, rightMost]) - marriage.file
 
                 let siblingGroup = this.siblingGroup(this.getHost(marriage))
-                // siblingGroup = siblingGroup.filter(node => node.file >= _.min(marriage.partners.map( p => p.file)))
-                siblingGroup.forEach(node => node.file = node.file + offset)
+                siblingGroup.forEach(node => {
+                    if (!alreadyPositioned.includes(node)) {
+                        node.file = node.file + offset
+                    }
+                })
+
+                marriage.partners.concat(marriage).forEach(node => {
+                    alreadyPositioned.push(node)
+                })
             }
         })
     }
