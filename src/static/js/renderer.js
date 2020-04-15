@@ -383,8 +383,8 @@ class Renderer {
         this.normalizeFiles()
         this.debug("Normalize Files")
 
-        ranks.forEach(rank => this.eliminateOverlaps(rank))
-        this.debug("Eliminate Overlaps")
+        // ranks.forEach(rank => this.eliminateOverlaps(rank))
+        // this.debug("Eliminate Overlaps")
 
         this.setXPositions()
         this.debug("Set X Positions")
