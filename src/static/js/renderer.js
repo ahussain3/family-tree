@@ -136,10 +136,9 @@ class Renderer {
         })
     }
 
-    getParents(node) {
-        // return the parents of either the person themselves if they are not
-        // married, or the parents_id of the host of the marriage if they are.
-        // returns null if the person has no parents
+    getVotingNode(node) {
+        // The voting node is the person themselves if they are not married,
+        // or the "host" of the marriage if they are.
         var votingNode = null
         if (node instanceof Marriage) {
             votingNode = this.getHost(node)
@@ -148,8 +147,20 @@ class Renderer {
         } else {
             votingNode = node
         }
+        return votingNode
+    }
 
-        return votingNode.parents
+    getParents(node) {
+        // return the parents of either the person themselves if they are not
+        // married, or the parents_id of the host of the marriage if they are.
+        // returns null if the person has no parents
+        return this.getVotingNode(node).parents
+    }
+
+    getParentsId(node) {
+        let votingNode = this.getVotingNode(node)
+        let parents = this.getParents(node)
+        return parents ? parents.id : `noparents_${votingNode.id}`
     }
 
     orderWithinRank(rank) {
@@ -202,21 +213,6 @@ class Renderer {
         }
     }
 
-    siblingGroup(person) {
-        // returns a list of nodes for people who are in the "sibling group"
-        // for this person, namely that they are siblings, or are married to // their siblings.
-        let siblings = this.g.nodes.filter(node => {
-            return person.parents != null &&
-            node.parents != null &&
-            node != person &&
-            node.parents.id == person.parents.id
-        })
-
-        let partners = [person, ...siblings].flatMap(p => p.marriages.flatMap(m => [m, ...m.partners]))
-
-        return _.uniq([person, ...siblings, ...partners])
-    }
-
     groupBy(list, iteratee) {
         const map = new Map();
         list.forEach((item) => {
@@ -229,6 +225,17 @@ class Renderer {
              }
         });
         return map;
+    }
+
+    siblingGroup(person) {
+        // returns a list of nodes for people who are in the "sibling group"
+        // for this person, namely that they are siblings, or are married to // their siblings.
+        let parentsId = this.getParentsId(person)
+
+        let group = this.g.nodes.filter(node => {
+            return this.getParentsId(node) == parentsId
+        })
+        return group
     }
 
     centerChildren(rank) {
@@ -268,21 +275,21 @@ class Renderer {
         // find the marriage node and center it over its children
         marriages.forEach(marriage => {
             if (marriage.children.length != 0) {
-                let siblingGroup = this.siblingGroup(marriage.children[0])
-                let leftMost = safeMin(siblingGroup.map(child => child.file))
-                let rightMost = safeMax(siblingGroup.map(child => child.file))
-                let offset = marriage.file - average([leftMost, rightMost])
+                let childrenGroup = this.siblingGroup(marriage.children[0])
+                let leftMost = safeMin(childrenGroup.map(child => child.file))
+                let rightMost = safeMax(childrenGroup.map(child => child.file))
+                let offset = average([leftMost, rightMost]) - marriage.file
 
-                this.siblingGroup(this.getHost(marriage)).forEach(node => {
-                    node.file = node.file - offset
-                })
+                let siblingGroup = this.siblingGroup(this.getHost(marriage))
+                // siblingGroup = siblingGroup.filter(node => node.file >= _.min(marriage.partners.map( p => p.file)))
+                siblingGroup.forEach(node => node.file = node.file + offset)
             }
         })
     }
 
     eliminateOverlaps(rank) {
         // For each rank goes left to right and "pushes" nodes to the right
-        // in order to remove overlaps.
+        // in order to remove overlaps. This is mostly just an extra failsafe.
         let nodes = _.sortBy(this.g.nodes.filter(node => node instanceof Person && node.rank == rank), node => node.file)
         for (var i = 1; i < nodes.length; i++) {
             if (nodes[i].file <= nodes[i-1].file + 0.8) {
@@ -358,12 +365,12 @@ class Renderer {
         ranks.forEach(rank => this.orderWithinRank(rank))
         this.debug("Order Within Ranks")
 
-        // let widestRank = this.findWidestRank()
-        // console.log("widestRank", widestRank)
-        // ranks.filter(rank => rank > widestRank).forEach(rank => this.centerChildren(rank))
-        // this.debug("Center Children")
-        // ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
-        // this.debug("Center Over Children")
+        let widestRank = this.findWidestRank()
+        console.log("widestRank", widestRank)
+        ranks.filter(rank => rank > widestRank).forEach(rank => this.centerChildren(rank))
+        this.debug("Center Children")
+        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
+        this.debug("Center Over Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
