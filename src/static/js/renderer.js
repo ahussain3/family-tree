@@ -136,6 +136,21 @@ class Renderer {
         })
     }
 
+    getParents(node) {
+        // return the parents of either the person themselves if they are not
+        // married, or the parents_id of the host of the marriage if they are.
+        // returns null if the person has no parents
+        var votingNode = null
+        if (node instanceof Marriage) {
+            votingNode = this.getHost(node)
+        } else if (node.isMarried()) {
+            votingNode = this.getHost(node.marriages[0])
+        } else {
+            votingNode = node
+        }
+
+        return votingNode.parents
+    }
 
     orderWithinRank(rank) {
         let nodes = this.g.nodes.filter(node => node.rank == rank)
@@ -152,17 +167,14 @@ class Renderer {
         // minimize line crossings by positioning groups of direct siblings
         // close to their counterparts on different levels
         nodes.sort((n1, n2) => {
-            let a = n1 instanceof Marriage ? this.getHost(n1) : n1
-            let b = n2 instanceof Marriage ? this.getHost(n2) : n2
-
-            let aParents = a.parents ? a.parents.file : undefined
-            let bParents = b.parents ? b.parents.file : undefined
+            let aParents = this.getParents(n1)
+            let bParents = this.getParents(n2)
 
             if (!aParents || !bParents) {
                 return 0
             }
 
-            return aParents < bParents ? -1 : 1
+            return aParents.file < bParents.file ? -1 : 1
         })
 
         // group people so that married people stay close together
@@ -226,17 +238,9 @@ class Renderer {
         // Only hosts of marriages are in the sibling group someone who
         // doesn't have parents is in their own sibling group
         let groups = this.groupBy(nodes, node => {
-            var votingNode = null
-            if (node instanceof Marriage) {
-                votingNode = this.getHost(node)
-            } else if (node.isMarried()) {
-                votingNode = this.getHost(node.marriages[0])
-            } else {
-                votingNode = node
-            }
-
-            if (votingNode.parents == null) { return `noparents_${votingNode.id}` }
-            return votingNode.parents.id
+            let parents = this.getParents(node)
+            if (parents == null) { return `noparents_${votingNode.id}` }
+            return parents.id
         })
 
         // for each sibling group, identify who the parents are
@@ -354,12 +358,12 @@ class Renderer {
         ranks.forEach(rank => this.orderWithinRank(rank))
         this.debug("Order Within Ranks")
 
-        let widestRank = this.findWidestRank()
-        console.log("widestRank", widestRank)
-        ranks.filter(rank => rank > widestRank).forEach(rank => this.centerChildren(rank))
-        this.debug("Center Children")
-        ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
-        this.debug("Center Over Children")
+        // let widestRank = this.findWidestRank()
+        // console.log("widestRank", widestRank)
+        // ranks.filter(rank => rank > widestRank).forEach(rank => this.centerChildren(rank))
+        // this.debug("Center Children")
+        // ranks.filter(rank => rank < widestRank).reverse().forEach(rank => this.centerOverChildren(rank))
+        // this.debug("Center Over Children")
 
         this.normalizeFiles()
         this.debug("Normalize Files")
