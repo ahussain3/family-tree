@@ -163,8 +163,13 @@ class Renderer {
         return parents ? parents.id : `noparents_${votingNode.id}`
     }
 
+    printNodeOrder(nodes) {
+        console.log(nodes.map(n=>n.name || "marriage").join(", "))
+    }
+
     orderWithinRank(rank) {
-        let nodes = this.g.nodes.filter(node => node.rank == rank)
+        // remove all nodes except hosts of marriages
+        let nodes = this.g.nodes.filter(node => node.rank == rank && this.getVotingNode(node) == node)
         let counter = 0
 
         // show the oldest person on the left
@@ -188,19 +193,26 @@ class Renderer {
             return aParents.file < bParents.file ? -1 : 1
         })
 
-        // group people so that married people stay close together
-        let marriages = nodes.filter(node => node instanceof Marriage)
-        let partners = _.flatten(marriages.map(marriage => marriage.partners))
-
-        // remove any persons who are in a marriage.
-        nodes = nodes.filter(node => !partners.includes(node))
-
-        // add back in any persons in a marriage (in the correct place)
-        marriages.forEach(marriage => {
-            let partners = marriage.partners.sort(p => p.isMale() ? -1 : 1)
-            nodes.insertBefore(partners[0], marriage)
-            nodes.insertAfter(partners[1], marriage)
+        // add back in partners and marriage nodes
+        let reconstructed_nodes = []
+        nodes.forEach(node => {
+            reconstructed_nodes.push(node)
+            if (node instanceof Person && node.isMarried()) {
+                let before = !node.isMale()
+                node.marriages.forEach(marriage => {
+                    let partner = marriage.otherPartner(node)
+                    if (before) {
+                        reconstructed_nodes.insertBefore(partner, node)
+                        reconstructed_nodes.insertBefore(marriage, node)
+                    } else {
+                        reconstructed_nodes.insertAfter(partner, node)
+                        reconstructed_nodes.insertAfter(marriage, node)
+                    }
+                    before = !before
+                })
+            }
         })
+        nodes = reconstructed_nodes
 
         for (var i = 0; i < nodes.length; i++) {
             nodes[i].file = counter
@@ -260,9 +272,7 @@ class Renderer {
             let rightMost = safeMax(group.map(child => child.file))
             let offset = _.max([0, parents.file - average([leftMost, rightMost])])
 
-            // center the sibling group over the parents, while avoiding
-            // overlaps.
-            group.forEach(node => node.file = node.file + offset + mod)
+            group.forEach(node => node.file = node.file + mod + offset)
             mod += offset
         }
     }
