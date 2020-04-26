@@ -2,7 +2,7 @@ window.onload = function() {
     let pw = 100
     let ph = 250
 
-    let JITTER = false
+    let JITTER = true
 
     var xhttp = new XMLHttpRequest();
     var people = Object.values(data).filter(item => item.__typename == 'Person').map(item => item.id)
@@ -192,30 +192,6 @@ window.onload = function() {
         renderLine(marriageNode.x, marriageNode.y - ph / 4, childNode.x, childNode.y - ph / 2, clearance)
     }
 
-    let preprocessVisible = function(visible) {
-        // if a single parent and a child are on screen. The other parent should
-        // also be visible.
-        // TODO(Awais) Make this code less ugly and more comprehensible
-        var makeVisible = new Set([])
-        visible.forEach(id => {
-            let person = data[id]
-            if (person.marriages) {
-                person.marriages.forEach(marriageId => {
-                    let marriage = data[marriageId]
-                    if (_.some(marriage.children, item => visible.has(item))) {
-                        marriage.partners.forEach(partnerId => {
-                            if (!visible.has(partnerId)) {
-                                makeVisible.add(partnerId)
-                            }
-                        })
-                    }
-                })
-            }
-        })
-
-        return new Set([...visible, ...makeVisible])
-    }
-
     let renderTree = function () {
         let renderer = new Renderer(data, visible)
         renderer.render().forEach(item => {
@@ -266,8 +242,6 @@ window.onload = function() {
     let main = async function() {
         // This is bad. We shouldn't need to run the same line of code twice.
         // There must be a neater way to handle the preprocess case.
-        await Promise.all([...visible].map(id => fetchPerson(id)))
-        visible = preprocessVisible(visible)
         await Promise.all([...visible].map(id => fetchPerson(id)))
         render()
 
@@ -351,7 +325,6 @@ window.onload = function() {
         await shortestPath(id, visible).then(result => {
             result.concat(id).forEach(item => {
                 visible.add(item)
-                visible = preprocessVisible(visible)
             })
         })
         updateUrlParams()

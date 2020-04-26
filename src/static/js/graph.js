@@ -45,6 +45,10 @@ class Person extends Node {
         this.parents = node
     }
 
+    isMarried(node) {
+        return this.marriages.length >= 1
+    }
+
     isMale() {
         return this.gender == gender.MALE
     }

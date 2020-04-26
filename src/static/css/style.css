@@ -158,6 +158,7 @@ div.person {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
     background-color: white;
     cursor: pointer;
+    z-index: 1;
 }
 
 div.person div.hide-person {
@@ -270,6 +271,7 @@ div.marriage {
 div.line {
     position: absolute;
     border: 0.5px solid gray;
+    z-index: 0;
 }
 
 /* MODAL */
