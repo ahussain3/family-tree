@@ -17,7 +17,7 @@ graphql-server-core==1.1.1
 gunicorn==20.0.4
 ipdb==0.11
 ipykernel==5.1.0
-ipython==7.1.1
+ipython==7.16.3
 ipython-genutils==0.2.0
 itsdangerous==1.1.0
 jedi==0.13.1
